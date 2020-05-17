@@ -39,7 +39,7 @@ def validate_input(data_df):
     print("Underlying Price: ", uprice)
     sp = get_available_strike_price(data_df)
     while True:
-        print("Enter the Order in given format Long/Short Call/Put Strike_Price Premium Qty (long call 210 12.0 1) ")
+        print("Enter the Order in given format Long/Short Call/Put Strike_Price Premium Lot_Qty (long call 210 12.0 1) ")
         inp = list(input().split())
         # conds_and = [inp, len(inp) == 5, check_trade_type(inp and inp[0][0]), check_option_type(inp and inp[1][0]), \
         #              compiled_regex(inp and inp[2]), compiled_regex(inp and inp[3]), compiled_regex(inp and inp[4])]
@@ -62,6 +62,8 @@ def update_values(inp_lst, data_df):
     validate_trade_value(inp_lst)
     validate_option_value(inp_lst)
     validate_strike_price_value(inp_lst, data_df)
+    validate_premium_value(inp_lst, data_df)
+    validate_lot_qty_value(inp_lst)
 
 
 def validate_trade_value(lst):
@@ -107,7 +109,32 @@ def validate_strike_price_value(lst, data_df):
                 if is_inp_str_number(res):
                     if is_strike_price_available(res, sp_lst):
                         lst[2] = float(res)
-                    break
+                        break
+
+
+def validate_premium_value(lst, data_df):
+    if is_inp_str_number(lst[3]):
+        if is_premium_available(lst, lst[3], data_df):
+            print("i m inside premium")
+            lst[3] = float(lst[3])
+        else:
+            while True:
+                res = message("Updated Premium Price:")
+                if is_inp_str_number(res):
+                    if is_premium_available(lst, res, data_df):
+                        lst[3] = float(res)
+                        break
+
+
+def validate_lot_qty_value(lst):
+    if is_inp_str_number(lst[4]):
+        lst[4] = int(lst[4])
+    else:
+        while True:
+            res = message("Updated Lot qty:")
+            if is_inp_str_number(res):
+                lst[4] = int(res)
+                break
 
 
 comp = re_compile("^\d+?\.\d+?$")
@@ -131,6 +158,15 @@ def message(msg):
     return input("Enter {} :".format(msg))
 
 
-# def is_premium_available(sp, data_df):
-#     print(data_df['Strike Price'] == sp[3])
+def is_premium_available(lst, val, data_df):
+
+    filter_sp_row = data_df['Strike Price'] == lst[2]
+    col_lst = ['High', 'Low'] if lst[1] == 'CE' else ['PE High', 'PE Low']
+
+    premium_range = data_df.loc[filter_sp_row, col_lst].values[0]
+    print(premium_range)
+
+    if premium_range[1] <= float(val) <= premium_range[0]:
+        return True
+    return False
 
