@@ -1,4 +1,4 @@
-from commons import open_file, trading_days
+from commons import open_file, trading_days, order_place
 
 symbol = 'DLF'
 expiry_date = '30-05-2019'
@@ -18,7 +18,7 @@ for day in working_days:
         order = []
         trade = input("Are you interested in Trade Today (Yes or No):")
         if trade == '' or trade[0].upper() == 'Y':
-        #     order = order_place(date, option)
+            order = order_place(day, current_day_optionchain_df)
         #     orders_list.append(order)
         #     # print("Order List", len(orders_list))
         #     display_trade_info(orders_list)
