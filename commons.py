@@ -1,3 +1,15 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sun May 14 2020
+
+@author: Mandeep S Gill
+
+email : msg8930@yahoo.com
+
+"""
+import os.path
+
 from re import compile as re_compile
 
 try:
@@ -10,7 +22,28 @@ def open_file(filename):
     try:
         return pd.read_csv(filename)
     except:
-        print("File is Missing")
+        print("{} File is Missing.. Please check the file".format(filename))
+
+
+def trade_book(sym, exp):
+    file_path = "Data/{}-TRDBOOK-{}.csv".format(sym, exp)
+    if os.path.exists(file_path):
+        return open_file(file_path)
+    else:
+        col_name = ["Contract Name", "Open Date", "Qty", "Type", "Adj. Cost"]
+        df = pd.DataFrame(columns=col_name)
+        return df
+
+
+def save_df(df, sym, exp):
+    file_path = "Data/{}-TRDBOOK-{}.csv".format(sym, exp)
+    print("Trade Book is Saving at this location {}".format(file_path))
+    df.to_csv(file_path)
+
+
+def exit_loop(val):
+    if val and val[0].upper() == 'E':
+        return True
 
 
 def trading_days(df):
@@ -20,35 +53,26 @@ def trading_days(df):
     return days
 
 
-def order_place(date, data_df):
+def order_place(data_df):
 
-    validate_input(data_df)
-        # # strike_price = get_strike_price(df)
-        # # premium = get_premium(df, strike_price)
-        # order_type = long_short()
-        # option = call_put()
-        # qty = int(message("Enter Qty of Options"))
-        #
-        # # uprice = 675.45
-        # # return Trade(date, order_type, option, strike_price, premium, qty, underlying=uprice)
-
+    return validate_input(data_df)
 
 
 def validate_input(data_df):
     uprice = data_df['Underlying'].values[0]
     print("Underlying Price: ", uprice)
-    sp = get_available_strike_price(data_df)
+    get_available_strike_price(data_df)
     while True:
         print("Enter the Order in given format Long/Short Call/Put Strike_Price Premium Lot_Qty (long call 210 12.0 1) ")
         inp = list(input().split())
-        # conds_and = [inp, len(inp) == 5, check_trade_type(inp and inp[0][0]), check_option_type(inp and inp[1][0]), \
-        #              compiled_regex(inp and inp[2]), compiled_regex(inp and inp[3]), compiled_regex(inp and inp[4])]
-        conds_and = [inp, len(inp) == 5]
-        if all(conds_and):
-            update_values(inp, data_df)
+
+        cond = [inp, len(inp) == 5]
+
+        if all(cond):
+            validate_or_update_values(inp, data_df)
             print("your in trade")
             print(inp)
-            break
+            return inp
 
 
 def get_available_strike_price(df):
@@ -58,7 +82,7 @@ def get_available_strike_price(df):
     return strike_price_range
 
 
-def update_values(inp_lst, data_df):
+def validate_or_update_values(inp_lst, data_df):
     validate_trade_value(inp_lst)
     validate_option_value(inp_lst)
     validate_strike_price_value(inp_lst, data_df)
@@ -115,7 +139,6 @@ def validate_strike_price_value(lst, data_df):
 def validate_premium_value(lst, data_df):
     if is_inp_str_number(lst[3]):
         if is_premium_available(lst, lst[3], data_df):
-            print("i m inside premium")
             lst[3] = float(lst[3])
         else:
             while True:
