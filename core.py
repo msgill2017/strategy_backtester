@@ -22,7 +22,7 @@ for day in working_days:
         #     orders_list.append(order)
         #     # print("Order List", len(orders_list))
         #     display_trade_info(orders_list)
-            print("your in trade")
+
         if trade and trade[0].upper() != 'Y':
             # if orders_lst:
                 # display_trade_info(orders_list)
