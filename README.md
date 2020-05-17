@@ -1,2 +1,2 @@
 # strategy_backtester
-This is the manual strategy backtester for options.
+This is the manual options strategy backtester.
