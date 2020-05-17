@@ -91,9 +91,9 @@ def validate_or_update_values(inp_lst, data_df):
 
 
 def validate_trade_value(lst):
-        if lst and lst[0].upper() == 'L':
+        if lst and lst[0][0].upper() == 'L':
             lst[0] = 'Long'
-        elif lst and lst[0].upper() == 'S':
+        elif lst and lst[0][0].upper() == 'S':
             lst[0] = 'Short'
         else:
             while True:
@@ -107,9 +107,9 @@ def validate_trade_value(lst):
 
 
 def validate_option_value(lst):
-    if lst and lst[1].upper() == 'C':
+    if lst and lst[1][0].upper() == 'C':
         lst[1] = 'CE'
-    elif lst and lst[1].upper() == 'P':
+    elif lst and lst[1][0].upper() == 'P':
         lst[1] = 'PE'
     else:
         while True:
