@@ -18,10 +18,12 @@ working_days = trading_days(option_chain_df)
 
 trade_book = trade_book(symbol, expiry_date)
 
-# print(trade_book)
-# print(optionchain_df)
-# print(working_days)
-for day in working_days:
+already_trade_days = trading_days(trade_book, col='Open Date')
+
+remaining_working_days = [elem for elem in working_days if elem not in already_trade_days]
+print(remaining_working_days)
+
+for day in remaining_working_days:
     print("Today is Date:{}".format(day))
     filter_date = option_chain_df['Date'] == day
     current_day_optionchain_df = option_chain_df[filter_date]
@@ -34,7 +36,9 @@ for day in working_days:
             order.append(day)
             print(order)
             order_df = list_to_df(order)
-            # print("order is ", order)
+            print("order-df", order_df)
+            trade_book = trade_book.append(order_df, sort=False, ignore_index=True)
+            print("Trade Book is ", trade_book)
         #     orders_list.append(order)
         #     # print("Order List", len(orders_list))
         #     display_trade_info(orders_list)

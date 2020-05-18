@@ -17,7 +17,7 @@ try:
 except ImportError:
     pass
 
-from config import TRADE_BOOK_COL, lot_size, symbol
+from config import TRADE_BOOK_COL, lot_size, symbol, expiry_date
 
 
 def open_file(filename):
@@ -39,7 +39,7 @@ def trade_book(sym, exp):
 def save_df(df, sym, exp):
     file_path = "Data/{}-TRDBOOK-{}.csv".format(sym, exp)
     print("Trade Book is Saving at this location {}".format(file_path))
-    df.to_csv(file_path)
+    df.to_csv(file_path, index=False)
 
 
 def list_to_df(lst):
@@ -61,10 +61,13 @@ def exit_loop(val):
         return True
 
 
-def trading_days(df):
-    days_row = df['Date'].tolist()
+def trading_days(df, col="Date"):
     days = []
-    [days.append(x) for x in days_row if x not in days]
+    try:
+        days_row = df['{}'.format(col)].tolist()
+        [days.append(x) for x in days_row if x not in days]
+    except:
+        days =[]
     return days
 
 
