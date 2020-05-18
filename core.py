@@ -9,7 +9,9 @@ email : msg8930@yahoo.com
 
 """
 
-from commons import open_file, trade_book, trading_days, order_place, exit_loop, save_df, list_to_df, portfolio_start_balance
+from commons import open_file, trade_book, trading_days, order_place, exit_loop, save_df,\
+                    list_to_df, portfolio_balance, no_trade_entry
+
 from config import symbol, expiry_date
 
 option_chain_df = open_file("Data/{}-OPTSTK-{}.csv".format(symbol, expiry_date))
@@ -18,12 +20,15 @@ working_days = trading_days(option_chain_df)
 
 trade_book = trade_book(symbol, expiry_date)
 
-already_trade_days = trading_days(trade_book, col='Open Date')
+already_trade_days = trading_days(trade_book, col='Open date')
 
 remaining_working_days = [elem for elem in working_days if elem not in already_trade_days]
 
+previous_day = already_trade_days[-1]
+
 for day in remaining_working_days:
-    portfolio_start_balance(trade_book, day)
+
+    portfolio_balance(trade_book, previous_day)
 
     filter_date = option_chain_df['Date'] == day
     current_day_option_chain_df = option_chain_df[filter_date]
@@ -47,11 +52,10 @@ for day in remaining_working_days:
             print("Exit")
             break
         if trade and trade[0].upper() != 'Y':
-            # if orders_lst:
-                # display_trade_info(orders_list)
-            # else:
-            print("----------------------------------")
-            print("No trade is available to display yet")
+            portfolio_balance(trade_book, previous_day)
+            nte_df = no_trade_entry(trade_book, day)
+            trade_book = trade_book.append(nte_df, sort=False, ignore_index=True)
+            previous_day = day
             break
     if exit_loop(trade):
         save_df(trade_book, symbol, expiry_date)

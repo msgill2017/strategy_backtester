@@ -66,22 +66,29 @@ def rename_col_names(df, val):
     return df.rename(columns=headers)
 
 
-def portfolio_start_balance(portfolio, start_date):
+def no_trade_entry(tb, date):
+    contract_name = 'NO-TRADE-DAY'
+    lst_update = [contract_name, date, 0.0, 'NoTrade', 0.0]
+    return pd.DataFrame([lst_update], columns=TRADE_BOOK_COL)
+
+
+def portfolio_balance(portfolio, start_date):
     print("Current Portfolio with Profit and Loss as on {}".format(start_date))
-    symbols = portfolio['Contract name'].unique()
-    print (symbols)
-    current_positions = portfolio
-    print("positions__future", current_positions)
+    # symbols = portfolio['Contract name'].unique()
+    # print (symbols)
+    # current_positions = portfolio
+    # print("positions__future", current_positions)
     long_positons = portfolio[portfolio['Type'] == 'Long'].groupby(['Contract name'])['Qty', 'Adj. cost'].sum()
     long_positons = rename_col_names(long_positons, 'Long')
-    print("Longs", long_positons)
+    # print("Longs", long_positons)
 
     short_positons = portfolio[portfolio['Type'] == 'Short'].groupby(['Contract name'])['Qty', 'Adj. cost'].sum()
     short_positons = rename_col_names(short_positons, 'Short')
-    print("Shorts", short_positons)
+    # print("Shorts", short_positons)
     combine_positions = pd.concat([long_positons, short_positons], axis=1, sort=False).fillna(0.0)
     # combine_positions = pd.merge(long_positons, short_positons, left_on='Contract name', right_on='Contract name')
-    print(combine_positions.reset_index().rename(columns={'index': 'Contract name'}))
+    combine_positions = combine_positions.reset_index().rename(columns={'index': 'Contract name'})
+    print(combine_positions)
     # sales = sales.reset_index()
     # print("Sales reset", sales)
     #
