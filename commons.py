@@ -45,7 +45,7 @@ def save_df(df, sym, exp):
 def list_to_df(lst):
     # df col. = Contract Name,Open Date,Qty,Type,Adj. Cost
     # lst ['Long', 'CE', 210.0, 1.2, 1, '2019-04-26']
-    contract_name = symbol + str(lst[2]) + lst[1]
+    contract_name = '{}-{}-{}'.format(symbol, str(lst[2]), lst[1])
     date = lst[5]
     qty = lst[4] * lot_size
     ty = lst[0]
@@ -72,23 +72,23 @@ def no_trade_entry(tb, date):
     return pd.DataFrame([lst_update], columns=TRADE_BOOK_COL)
 
 
-def portfolio_balance(portfolio, start_date):
-    print("Current Portfolio with Profit and Loss as on {}".format(start_date))
-    # symbols = portfolio['Contract name'].unique()
-    # print (symbols)
-    # current_positions = portfolio
-    # print("positions__future", current_positions)
-    long_positons = portfolio[portfolio['Type'] == 'Long'].groupby(['Contract name'])['Qty', 'Adj. cost'].sum()
-    long_positons = rename_col_names(long_positons, 'Long')
-    # print("Longs", long_positons)
+def portfolio_balance(portfolio, df, previous_date):
+    print("Current Portfolio with Profit and Loss as on {}".format(previous_date))
+    symbols = portfolio['Contract name'].unique().tolist()
+    symbols.remove('NO-TRADE-DAY')
 
-    short_positons = portfolio[portfolio['Type'] == 'Short'].groupby(['Contract name'])['Qty', 'Adj. cost'].sum()
-    short_positons = rename_col_names(short_positons, 'Short')
-    # print("Shorts", short_positons)
-    combine_positions = pd.concat([long_positons, short_positons], axis=1, sort=False).fillna(0.0)
-    # combine_positions = pd.merge(long_positons, short_positons, left_on='Contract name', right_on='Contract name')
+    print(symbols)
+    long_positions = long_positions_df(portfolio)
+    short_positions = short_positions_df(portfolio)
+
+    combine_positions = pd.concat([long_positions, short_positions], axis=1, sort=False).fillna(0.0)
     combine_positions = combine_positions.reset_index().rename(columns={'index': 'Contract name'})
     print(combine_positions)
+
+    daily_adj_close = get_data(symbols, df)
+    print(daily_adj_close)
+    # daily_adj_close = daily_adj_close[['Close']].reset_index()
+
     # sales = sales.reset_index()
     # print("Sales reset", sales)
     #
@@ -109,6 +109,48 @@ def portfolio_balance(portfolio, start_date):
     # # df.groupby('A').agg({'B': ['min', 'max'], 'C': 'sum'})
     # print("adj_positions_df after qty", adj_positions_df)
     # return adj_positions_df
+
+
+def long_positions_df(df):
+    long_positons = df[df['Type'] == 'Long'].groupby(['Contract name'])['Qty', 'Adj. cost'].sum()
+    return rename_col_names(long_positons, 'Long')
+    # print("Longs", long_positons)
+
+
+def short_positions_df(df):
+    short_positons = df[df['Type'] == 'Short'].groupby(['Contract name'])['Qty', 'Adj. cost'].sum()
+    return rename_col_names(short_positons, 'Short')
+    # print("Shorts", short_positons)
+
+
+def get_data(sym, df):
+    print('I m in get data')
+    sp = symbol_to_strike_price(sym)
+    closes = []
+    print("strike price", sp)
+    print("op ")
+    temp = df[df['Strike Price'].isin(sp)]
+    temp = temp[['Strike Price', 'CE Close', 'PE Close']].reset_index()
+    print(temp)
+
+    for item in sym:
+        
+        lst = item.split('-')
+
+        sp_filter = temp['Strike Price'] == float(lst[1])
+
+        val = temp.loc[sp_filter, '{} Close'.format(lst[2])].values[0]
+
+        closes.append([item, val])
+
+    return pd.DataFrame(closes, columns=['Contract name', 'Close'])
+
+
+def symbol_to_strike_price(sym):
+    sp = []
+    for elem in sym:
+        sp.append(elem.split('-')[1])
+    return sp
 
 
 def trading_days(df, col="Date"):
@@ -252,7 +294,7 @@ def message(msg):
 def is_premium_available(lst, val, data_df):
 
     filter_sp_row = data_df['Strike Price'] == lst[2]
-    col_lst = ['High', 'Low'] if lst[1] == 'CE' else ['PE High', 'PE Low']
+    col_lst = ['CE High', 'CE Low'] if lst[1] == 'CE' else ['PE High', 'PE Low']
 
     premium_range = data_df.loc[filter_sp_row, col_lst].values[0]
     print(premium_range)

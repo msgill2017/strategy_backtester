@@ -28,7 +28,10 @@ previous_day = already_trade_days[-1]
 
 for day in remaining_working_days:
 
-    portfolio_balance(trade_book, previous_day)
+    filter_date = option_chain_df['Date'] == previous_day
+    previous_day_option_chain_df = option_chain_df[filter_date]
+
+    portfolio_balance(trade_book, previous_day_option_chain_df, previous_day)
 
     filter_date = option_chain_df['Date'] == day
     current_day_option_chain_df = option_chain_df[filter_date]
@@ -40,11 +43,11 @@ for day in remaining_working_days:
         if trade == '' or trade[0].upper() == 'Y':
             order = order_place(current_day_option_chain_df)
             order.append(day)
-            print(order)
+            # print(order)
             order_df = list_to_df(order)
-            print("order-df", order_df)
+            # print("order-df", order_df)
             trade_book = trade_book.append(order_df, sort=False, ignore_index=True)
-            print("Trade Book is ", trade_book)
+            # print("Trade Book is ", trade_book)
         #     orders_list.append(order)
         #     # print("Order List", len(orders_list))
         #     display_trade_info(orders_list)
