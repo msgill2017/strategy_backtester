@@ -9,11 +9,8 @@ email : msg8930@yahoo.com
 
 """
 
-from commons import open_file, trade_book, trading_days, order_place, exit_loop, save_df
-
-symbol = 'DLF'
-expiry_date = '30-05-2019'
-lot_size = 2600
+from commons import open_file, trade_book, trading_days, order_place, exit_loop, save_df, list_to_df
+from config import symbol, expiry_date
 
 option_chain_df = open_file("Data/{}-OPTSTK-{}.csv".format(symbol, expiry_date))
 
@@ -21,7 +18,7 @@ working_days = trading_days(option_chain_df)
 
 trade_book = trade_book(symbol, expiry_date)
 
-print(trade_book)
+# print(trade_book)
 # print(optionchain_df)
 # print(working_days)
 for day in working_days:
@@ -34,7 +31,10 @@ for day in working_days:
         order = []
         if trade == '' or trade[0].upper() == 'Y':
             order = order_place(current_day_optionchain_df)
-            print("order is ", order)
+            order.append(day)
+            print(order)
+            order_df = list_to_df(order)
+            # print("order is ", order)
         #     orders_list.append(order)
         #     # print("Order List", len(orders_list))
         #     display_trade_info(orders_list)

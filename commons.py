@@ -17,6 +17,8 @@ try:
 except ImportError:
     pass
 
+from config import TRADE_BOOK_COL, lot_size, symbol
+
 
 def open_file(filename):
     try:
@@ -30,8 +32,7 @@ def trade_book(sym, exp):
     if os.path.exists(file_path):
         return open_file(file_path)
     else:
-        col_name = ["Contract Name", "Open Date", "Qty", "Type", "Adj. Cost"]
-        df = pd.DataFrame(columns=col_name)
+        df = pd.DataFrame(columns=TRADE_BOOK_COL)
         return df
 
 
@@ -39,6 +40,20 @@ def save_df(df, sym, exp):
     file_path = "Data/{}-TRDBOOK-{}.csv".format(sym, exp)
     print("Trade Book is Saving at this location {}".format(file_path))
     df.to_csv(file_path)
+
+
+def list_to_df(lst):
+    # df col. = Contract Name,Open Date,Qty,Type,Adj. Cost
+    # lst ['Long', 'CE', 210.0, 1.2, 1, '2019-04-26']
+    contract_name = symbol + str(lst[2]) + lst[1]
+    date = lst[5]
+    qty = lst[4] * lot_size
+    ty = lst[0]
+    adj_cost = qty * lst[3]
+
+    lst_update = [contract_name, date, qty, ty, adj_cost]
+
+    return pd.DataFrame([lst_update], columns=TRADE_BOOK_COL)
 
 
 def exit_loop(val):
