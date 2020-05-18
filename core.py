@@ -9,7 +9,7 @@ email : msg8930@yahoo.com
 
 """
 
-from commons import open_file, trade_book, trading_days, order_place, exit_loop, save_df, list_to_df
+from commons import open_file, trade_book, trading_days, order_place, exit_loop, save_df, list_to_df, portfolio_start_balance
 from config import symbol, expiry_date
 
 option_chain_df = open_file("Data/{}-OPTSTK-{}.csv".format(symbol, expiry_date))
@@ -21,18 +21,19 @@ trade_book = trade_book(symbol, expiry_date)
 already_trade_days = trading_days(trade_book, col='Open Date')
 
 remaining_working_days = [elem for elem in working_days if elem not in already_trade_days]
-print(remaining_working_days)
 
 for day in remaining_working_days:
-    print("Today is Date:{}".format(day))
+    portfolio_start_balance(trade_book, day)
+
     filter_date = option_chain_df['Date'] == day
-    current_day_optionchain_df = option_chain_df[filter_date]
+    current_day_option_chain_df = option_chain_df[filter_date]
+
     # print(current_day_optionchain_df)
     while True:
         trade = input("Are you interested in Trade Today (Yes or No) oR Enter (Exit or e) for Exit:")
         order = []
         if trade == '' or trade[0].upper() == 'Y':
-            order = order_place(current_day_optionchain_df)
+            order = order_place(current_day_option_chain_df)
             order.append(day)
             print(order)
             order_df = list_to_df(order)

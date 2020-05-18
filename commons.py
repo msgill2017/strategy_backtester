@@ -61,6 +61,49 @@ def exit_loop(val):
         return True
 
 
+def rename_col_names(df, val):
+    headers = {'Qty': '{} Qty'.format(val), 'Adj. cost': '{} Adj. cost'.format(val)}
+    return df.rename(columns=headers)
+
+
+def portfolio_start_balance(portfolio, start_date):
+    print("Current Portfolio with Profit and Loss as on {}".format(start_date))
+    symbols = portfolio['Contract name'].unique()
+    print (symbols)
+    current_positions = portfolio
+    print("positions__future", current_positions)
+    long_positons = portfolio[portfolio['Type'] == 'Long'].groupby(['Contract name'])['Qty', 'Adj. cost'].sum()
+    long_positons = rename_col_names(long_positons, 'Long')
+    print("Longs", long_positons)
+
+    short_positons = portfolio[portfolio['Type'] == 'Short'].groupby(['Contract name'])['Qty', 'Adj. cost'].sum()
+    short_positons = rename_col_names(short_positons, 'Short')
+    print("Shorts", short_positons)
+    combine_positions = pd.concat([long_positons, short_positons], axis=1, sort=False).fillna(0.0)
+    # combine_positions = pd.merge(long_positons, short_positons, left_on='Contract name', right_on='Contract name')
+    print(combine_positions.reset_index().rename(columns={'index': 'Contract name'}))
+    # sales = sales.reset_index()
+    # print("Sales reset", sales)
+    #
+    # positions_no_change = positions_before_start[~positions_before_start['Contract name'].isin(sales['Contract name'].unique())]
+    # print("positions_no_change", positions_no_change)
+    # adj_positions_df = pd.DataFrame()
+
+    # for sale in sales.iterrows():
+    #     print("sale in loop", sale)
+    #     adj_positions = position_adjust(positions_before_start, sale)
+    #     adj_positions_df = adj_positions_df.append(adj_positions)
+    # adj_positions_df = adj_positions_df.append(positions_no_change)
+    # adj_positions_df = adj_positions_df.append(future_positions)
+    # print("adj_positions_df", adj_positions_df)
+    # adj_positions_df = adj_positions_df[adj_positions_df['Qty'] > 0]
+    # adj_positions_df = adj_positions_df.groupby('Symbol').agg(
+    #     {'Qty': 'sum', 'Adj cost': 'sum', 'Adj cost per share': 'mean'})
+    # # df.groupby('A').agg({'B': ['min', 'max'], 'C': 'sum'})
+    # print("adj_positions_df after qty", adj_positions_df)
+    # return adj_positions_df
+
+
 def trading_days(df, col="Date"):
     days = []
     try:
