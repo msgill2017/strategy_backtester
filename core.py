@@ -20,7 +20,7 @@ working_days = trading_days(option_chain_df)
 
 trade_book = trade_book(symbol, expiry_date)
 
-already_trade_days = trading_days(trade_book, col='Open date')
+already_trade_days = trading_days(trade_book, col='Open_date')
 
 remaining_working_days = [elem for elem in working_days if elem not in already_trade_days]
 

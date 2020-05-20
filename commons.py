@@ -17,7 +17,13 @@ try:
 except ImportError:
     pass
 
+
 from config import TRADE_BOOK_COL, lot_size, symbol, expiry_date
+
+
+pd.set_option('display.max_columns', None)
+pd.set_option('display.expand_frame_repr', False)
+pd.set_option('max_colwidth', -1)
 
 
 def open_file(filename):
@@ -62,7 +68,7 @@ def exit_loop(val):
 
 
 def rename_col_names(df, val):
-    headers = {'Qty': '{} Qty'.format(val), 'Adj. cost': '{} Adj. cost'.format(val)}
+    headers = {'Qty': '{}_qty'.format(val), 'Adj_cost': '{}_adj_cost'.format(val)}
     return df.rename(columns=headers)
 
 
@@ -74,7 +80,7 @@ def no_trade_entry(tb, date):
 
 def portfolio_balance(portfolio, df, previous_date):
     print("Current Portfolio with Profit and Loss as on {}".format(previous_date))
-    symbols = portfolio['Contract name'].unique().tolist()
+    symbols = portfolio['Contract_name'].unique().tolist()
     symbols.remove('NO-TRADE-DAY')
 
     print(symbols)
@@ -82,7 +88,7 @@ def portfolio_balance(portfolio, df, previous_date):
     short_positions = short_positions_df(portfolio)
 
     combine_positions = pd.concat([long_positions, short_positions], axis=1, sort=False).fillna(0.0)
-    combine_positions = combine_positions.reset_index().rename(columns={'index': 'Contract name'})
+    combine_positions = combine_positions.reset_index().rename(columns={'index': 'Contract_name'})
     print(combine_positions)
 
     daily_adj_close = get_data(symbols, df)
@@ -112,29 +118,41 @@ def portfolio_balance(portfolio, df, previous_date):
 
 
 def long_positions_df(df):
-    long_positons = df[df['Type'] == 'Long'].groupby(['Contract name'])['Qty', 'Adj. cost'].sum()
-    return rename_col_names(long_positons, 'Long')
-    # print("Longs", long_positons)
+    long_positons = df[df['Type'] == 'Long'].groupby(['Contract_name'])['Qty', 'Adj_cost'].sum()
+    long_positons['L_per_share'] = (long_positons.Adj_cost / long_positons.Qty)
+    return rename_col_names(long_positons, 'L')
 
 
 def short_positions_df(df):
-    short_positons = df[df['Type'] == 'Short'].groupby(['Contract name'])['Qty', 'Adj. cost'].sum()
-    return rename_col_names(short_positons, 'Short')
-    # print("Shorts", short_positons)
+    short_positions = df[df['Type'] == 'Short'].groupby(['Contract_name'])['Qty', 'Adj_cost'].sum()
+    short_positions['S_per_share'] = (short_positions.Adj_cost / short_positions.Qty)
+    return rename_col_names(short_positions, 'S')
+
+
+def squared_off_position_df():
+    pass
+
+
+def realized_profit():
+    pass
+
+
+def un_realized_profit():
+    pass
+
+
+def pending_position_df():
+    pass
 
 
 def get_data(sym, df):
-    print('I m in get data')
     sp = symbol_to_strike_price(sym)
     closes = []
-    print("strike price", sp)
-    print("op ")
     temp = df[df['Strike Price'].isin(sp)]
     temp = temp[['Strike Price', 'CE Close', 'PE Close']].reset_index()
-    print(temp)
 
     for item in sym:
-        
+
         lst = item.split('-')
 
         sp_filter = temp['Strike Price'] == float(lst[1])
