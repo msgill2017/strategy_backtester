@@ -85,19 +85,27 @@ def portfolio_balance(portfolio, df, previous_date):
     short_positions = short_positions_df(portfolio)
     print(short_positions)
 
-    combine_positions = long_positions.merge(short_positions, on='Contract_name', how='outer').fillna(0.0)
+    combine_positions = merge_df(long_positions, short_positions)
 
     # print(combine_positions)
-    combine_positions = open_trade(combine_positions)
+    combine_positions_df = open_trade(combine_positions)
     # print(open_positions_df)
     # unr_pnl_df = un_realized_profit(combine_positions)
-
-    r_pnl_df = realized_profit(combine_positions)
-    print(r_pnl_df)
-    combine_positions = combine_positions.merge(r_pnl_df, on='Contract_name', how='outer').fillna(0.0)
+    current_close_value_df = get_close_data(symbols, df)
+    print(current_close_value_df)
+    combine_positions_df = merge_df(combine_positions_df, current_close_value_df)
     print(combine_positions)
+    r_pnl_df = realized_profit(combine_positions_df)
+    combine_positions_df = merge_df(combine_positions_df, r_pnl_df)
+    unr_pnl_df = un_realized_profit(combine_positions_df)
+
     # print(r_pnl_df)
 
+    print(combine_positions_df)
+
+
+def merge_df(df1, df2):
+    return df1.merge(df2, on='Contract_name', how='outer').fillna(0.0)
 
 
 def rename_col_names(df, val):
@@ -148,36 +156,37 @@ def check_trade_type(num):
         return 'Short'
 
 
-def un_realized_profit():
-    pass
+def un_realized_profit(df):
+    unr_pnl_lst = []
+    for row in df.itertuples():
+        cn = row.Contract_name
 
 
 def realized_profit(df):
     closed_contract_filter = (df['Long_qty'] > 0) & (df['Short_qty'] > 0)
     closed_df = df[closed_contract_filter]
-    realized_pnl_df = pd.DataFrame()
-    realized_pnl_df['Contract_name'] = closed_df['Contract_name']
-    realized_pnl = []
-    closed_qty = []
+    lists = []
     for row in closed_df.itertuples():
+        cn = row.Contract_name
         if row.Long_qty < row.Short_qty:
-            closed_qty.append(row.Long_qty)
-            realized_pnl.append(round(row.Long_qty * (row.Short_avg - row.Long_avg), 2))
+            qty = row.Long_qty
+            pnl = round(row.Long_qty * (row.Short_avg - row.Long_avg), 2)
+            lists.append([cn, qty, pnl])
         else:
-            closed_qty.append(row.Short_qty)
-            realized_pnl.append(round(row.Short_qty * (row.Short_avg - row.Long_avg), 2))
-    realized_pnl_df['Square_qty'] = closed_qty
-    realized_pnl_df['Realized_pnl'] = realized_pnl
-    return realized_pnl_df
+            qty = row.Short_qty
+            pnl = round(row.Short_qty * (row.Short_avg - row.Long_avg), 2)
+            lists.append([cn, qty, pnl])
+
+    return pd.DataFrame(lists, columns=['Contract_name', 'Squared_qty', 'Realized_PnL'])
 
 
-def get_data(sym, df):
-    sp = symbol_to_strike_price(sym)
+def get_close_data(symbols, df):
+    sp = symbol_to_strike_price(symbols)
     closes = []
     temp = df[df['Strike Price'].isin(sp)]
     temp = temp[['Strike Price', 'CE Close', 'PE Close']].reset_index()
 
-    for item in sym:
+    for item in symbols:
 
         lst = item.split('-')
 
@@ -187,7 +196,7 @@ def get_data(sym, df):
 
         closes.append([item, val])
 
-    return pd.DataFrame(closes, columns=['Contract name', 'Close'])
+    return pd.DataFrame(closes, columns=['Contract_name', 'Close'])
 
 
 def symbol_to_strike_price(sym):
