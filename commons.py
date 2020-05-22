@@ -67,11 +67,6 @@ def exit_loop(val):
         return True
 
 
-def rename_col_names(df, val):
-    headers = {'Qty': '{}_qty'.format(val), 'Adj_cost': '{}_adj_cost'.format(val)}
-    return df.rename(columns=headers)
-
-
 def no_trade_entry(tb, date):
     contract_name = 'NO-TRADE-DAY'
     lst_update = [contract_name, date, 0.0, 'NoTrade', 0.0]
@@ -85,52 +80,82 @@ def portfolio_balance(portfolio, df, previous_date):
 
     print(symbols)
     long_positions = long_positions_df(portfolio)
+    print(long_positions)
     short_positions = short_positions_df(portfolio)
+    print(short_positions)
 
-    combine_positions = pd.concat([long_positions, short_positions], axis=1, sort=False).fillna(0.0)
-    combine_positions = combine_positions.reset_index().rename(columns={'index': 'Contract_name'})
-    print(combine_positions)
+    combine_positions = long_positions.merge(short_positions, on='Contract_name', how='outer').fillna(0.0)
 
-    daily_adj_close = get_data(symbols, df)
-    print(daily_adj_close)
-    # daily_adj_close = daily_adj_close[['Close']].reset_index()
+    # print(combine_positions)
+    open_qty(combine_positions)
+    # common_contract = common_elements(long_positions['Contract_name'].unique().tolist(), short_positions['Contract_name'].unique().tolist())
+    # print(common_contract)
+    # for contract in common_contract:
+    #     print(contract)
+    #     long_row_filter = long_positions['Contract_name']==contract
+    #     short_row_filter = short_positions['Contract_name'] == contract
+    #     if long_positions.loc[long_row_filter, 'Qty'] <= short_positions.loc[short_row_filter, 'Qty']:
+    #         short_positions[short_row_filter]['Qty'] -= long_positions[long_row_filter]['Qty']
+    #         print(short_positions['S_qty'])
+    #     else:
+    #         long_positions[long_row_filter]['Qty'] -= short_positions[short_row_filter]['Qty']
+    #         # sale[1]['Qty'] -= sale[1]['Qty']
+    #         print(long_positions)
+        # print(
+    # positions_no_change = long_positions[~long_positions['Contract_name'].isin(short_positions['Contract_name'].unique())]
+    # print("positon no change", positions_no_change)
+    # daily_adj_close = get_data(symbols, df)
+    # print(daily_adj_close)
 
-    # sales = sales.reset_index()
-    # print("Sales reset", sales)
-    #
-    # positions_no_change = positions_before_start[~positions_before_start['Contract name'].isin(sales['Contract name'].unique())]
-    # print("positions_no_change", positions_no_change)
-    # adj_positions_df = pd.DataFrame()
 
-    # for sale in sales.iterrows():
-    #     print("sale in loop", sale)
-    #     adj_positions = position_adjust(positions_before_start, sale)
-    #     adj_positions_df = adj_positions_df.append(adj_positions)
-    # adj_positions_df = adj_positions_df.append(positions_no_change)
-    # adj_positions_df = adj_positions_df.append(future_positions)
-    # print("adj_positions_df", adj_positions_df)
-    # adj_positions_df = adj_positions_df[adj_positions_df['Qty'] > 0]
-    # adj_positions_df = adj_positions_df.groupby('Symbol').agg(
-    #     {'Qty': 'sum', 'Adj cost': 'sum', 'Adj cost per share': 'mean'})
-    # # df.groupby('A').agg({'B': ['min', 'max'], 'C': 'sum'})
-    # print("adj_positions_df after qty", adj_positions_df)
-    # return adj_positions_df
+def rename_col_names(df, val):
+    headers = {'Qty': '{}_qty'.format(val), 'Adj_cost': '{}_value'.format(val)}
+    return df.rename(columns=headers)
 
 
 def long_positions_df(df):
-    long_positons = df[df['Type'] == 'Long'].groupby(['Contract_name'])['Qty', 'Adj_cost'].sum()
-    long_positons['L_per_share'] = (long_positons.Adj_cost / long_positons.Qty)
-    return rename_col_names(long_positons, 'L')
+    long_positions = df[df['Type'] == 'Long'].groupby('Contract_name', as_index=False)['Qty', 'Adj_cost'].sum()
+    long_positions.insert(2, 'Long_avg', (long_positions.Adj_cost / long_positions.Qty))
+
+    return rename_col_names(long_positions, 'Long')
 
 
 def short_positions_df(df):
-    short_positions = df[df['Type'] == 'Short'].groupby(['Contract_name'])['Qty', 'Adj_cost'].sum()
-    short_positions['S_per_share'] = (short_positions.Adj_cost / short_positions.Qty)
-    return rename_col_names(short_positions, 'S')
+    short_positions = df[df['Type'] == 'Short'].groupby('Contract_name', as_index=False)['Qty', 'Adj_cost'].sum()
+    short_positions.insert(2, 'Short_avg', (short_positions.Adj_cost / short_positions.Qty))
+
+    return rename_col_names(short_positions, 'Short')
 
 
-def squared_off_position_df():
-    pass
+def common_elements(lst1, lst2):
+    return list(set(lst1).intersection(lst2))
+
+
+def open_qty(df):
+
+    df['Open_qty'] = abs(df['Long_qty'] - df['Short_qty'])
+    df['Type'] = find_pending_trade_type(df)
+    # trade_type_col(df)
+    print(df)
+
+
+# Create a function to apply to each row of the data frame
+def find_pending_trade_type(df):
+    """ Find the trade value according to its sign like negative number means Short type
+    or positive number means Long """
+    df['Type'] = df['Long_qty'] - df['Short_qty']
+    # df['a'] = df['a'].map(lambda a: a / 2.)
+
+    return df['Type'].map(lambda val: check_trade_type(val))
+
+
+def check_trade_type(num):
+    if num > 0:
+        return 'Long'
+    elif num == 0:
+        return 'None'
+    else:
+        return 'Short'
 
 
 def realized_profit():
@@ -138,10 +163,6 @@ def realized_profit():
 
 
 def un_realized_profit():
-    pass
-
-
-def pending_position_df():
     pass
 
 
