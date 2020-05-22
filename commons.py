@@ -78,29 +78,23 @@ def portfolio_balance(portfolio, df, previous_date):
     print("Current Portfolio with Profit and Loss as on {}".format(previous_date))
     symbols = portfolio['Contract_name'].unique().tolist()
     symbols.remove('NO-TRADE-DAY')
-
-    print(symbols)
     long_positions = long_positions_df(portfolio)
-    print(long_positions)
+
     short_positions = short_positions_df(portfolio)
-    print(short_positions)
 
-    combine_positions = merge_df(long_positions, short_positions)
+    combine_positions_df = merge_df(long_positions, short_positions)
+    #
+    # # print(combine_positions)
+    combine_positions_df = open_trade(combine_positions_df)
 
-    # print(combine_positions)
-    combine_positions_df = open_trade(combine_positions)
-    # print(open_positions_df)
-    # unr_pnl_df = un_realized_profit(combine_positions)
     current_close_value_df = get_close_data(symbols, df)
-    print(current_close_value_df)
     combine_positions_df = merge_df(combine_positions_df, current_close_value_df)
-    print(combine_positions)
+
     r_pnl_df = realized_profit(combine_positions_df)
     combine_positions_df = merge_df(combine_positions_df, r_pnl_df)
+
     unr_pnl_df = un_realized_profit(combine_positions_df)
-
-    # print(r_pnl_df)
-
+    combine_positions_df = merge_df(combine_positions_df, unr_pnl_df)
     print(combine_positions_df)
 
 
@@ -160,6 +154,16 @@ def un_realized_profit(df):
     unr_pnl_lst = []
     for row in df.itertuples():
         cn = row.Contract_name
+        if row.Type == 'Long':
+            val = (row.Long_qty - row.Squared_qty) * (row.Close - row.Long_avg)
+            val = round(val, 2)
+            unr_pnl_lst.append([cn, val])
+        else:
+            val = (row.Short_qty - row.Squared_qty) * (row.Short_avg - row.Close)
+            val = round(val, 2)
+            unr_pnl_lst.append([cn, val])
+
+    return pd.DataFrame(unr_pnl_lst, columns=['Contract_name', 'UnRealized_PnL'])
 
 
 def realized_profit(df):

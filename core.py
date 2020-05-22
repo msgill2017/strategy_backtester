@@ -55,7 +55,9 @@ for day in remaining_working_days:
             print("Exit")
             break
         if trade and trade[0].upper() != 'Y':
-            portfolio_balance(trade_book, previous_day)
+
+            portfolio_balance(trade_book, previous_day_option_chain_df, previous_day)
+
             nte_df = no_trade_entry(trade_book, day)
             trade_book = trade_book.append(nte_df, sort=False, ignore_index=True)
             previous_day = day
