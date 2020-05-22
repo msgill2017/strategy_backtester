@@ -14,6 +14,7 @@ from re import compile as re_compile
 
 try:
     import pandas as pd
+    import numpy as np
 except ImportError:
     pass
 
@@ -87,25 +88,16 @@ def portfolio_balance(portfolio, df, previous_date):
     combine_positions = long_positions.merge(short_positions, on='Contract_name', how='outer').fillna(0.0)
 
     # print(combine_positions)
-    open_qty(combine_positions)
-    # common_contract = common_elements(long_positions['Contract_name'].unique().tolist(), short_positions['Contract_name'].unique().tolist())
-    # print(common_contract)
-    # for contract in common_contract:
-    #     print(contract)
-    #     long_row_filter = long_positions['Contract_name']==contract
-    #     short_row_filter = short_positions['Contract_name'] == contract
-    #     if long_positions.loc[long_row_filter, 'Qty'] <= short_positions.loc[short_row_filter, 'Qty']:
-    #         short_positions[short_row_filter]['Qty'] -= long_positions[long_row_filter]['Qty']
-    #         print(short_positions['S_qty'])
-    #     else:
-    #         long_positions[long_row_filter]['Qty'] -= short_positions[short_row_filter]['Qty']
-    #         # sale[1]['Qty'] -= sale[1]['Qty']
-    #         print(long_positions)
-        # print(
-    # positions_no_change = long_positions[~long_positions['Contract_name'].isin(short_positions['Contract_name'].unique())]
-    # print("positon no change", positions_no_change)
-    # daily_adj_close = get_data(symbols, df)
-    # print(daily_adj_close)
+    combine_positions = open_trade(combine_positions)
+    # print(open_positions_df)
+    # unr_pnl_df = un_realized_profit(combine_positions)
+
+    r_pnl_df = realized_profit(combine_positions)
+    print(r_pnl_df)
+    combine_positions = combine_positions.merge(r_pnl_df, on='Contract_name', how='outer').fillna(0.0)
+    print(combine_positions)
+    # print(r_pnl_df)
+
 
 
 def rename_col_names(df, val):
@@ -131,12 +123,11 @@ def common_elements(lst1, lst2):
     return list(set(lst1).intersection(lst2))
 
 
-def open_qty(df):
+def open_trade(df):
 
     df['Open_qty'] = abs(df['Long_qty'] - df['Short_qty'])
     df['Type'] = find_pending_trade_type(df)
-    # trade_type_col(df)
-    print(df)
+    return df
 
 
 # Create a function to apply to each row of the data frame
@@ -144,7 +135,6 @@ def find_pending_trade_type(df):
     """ Find the trade value according to its sign like negative number means Short type
     or positive number means Long """
     df['Type'] = df['Long_qty'] - df['Short_qty']
-    # df['a'] = df['a'].map(lambda a: a / 2.)
 
     return df['Type'].map(lambda val: check_trade_type(val))
 
@@ -158,12 +148,27 @@ def check_trade_type(num):
         return 'Short'
 
 
-def realized_profit():
-    pass
-
-
 def un_realized_profit():
     pass
+
+
+def realized_profit(df):
+    closed_contract_filter = (df['Long_qty'] > 0) & (df['Short_qty'] > 0)
+    closed_df = df[closed_contract_filter]
+    realized_pnl_df = pd.DataFrame()
+    realized_pnl_df['Contract_name'] = closed_df['Contract_name']
+    realized_pnl = []
+    closed_qty = []
+    for row in closed_df.itertuples():
+        if row.Long_qty < row.Short_qty:
+            closed_qty.append(row.Long_qty)
+            realized_pnl.append(round(row.Long_qty * (row.Short_avg - row.Long_avg), 2))
+        else:
+            closed_qty.append(row.Short_qty)
+            realized_pnl.append(round(row.Short_qty * (row.Short_avg - row.Long_avg), 2))
+    realized_pnl_df['Square_qty'] = closed_qty
+    realized_pnl_df['Realized_pnl'] = realized_pnl
+    return realized_pnl_df
 
 
 def get_data(sym, df):
