@@ -13,4 +13,4 @@ symbol = 'DLF'
 expiry_date = '30-05-2019'
 lot_size = 2600
 
-TRADE_BOOK_COL = ["Contract_name", "Open_date", "Qty", "Type", "Adj_cost"]
+TRADE_BOOK_COL = ["Contract_name", "Open_date", "Qty", "Type", "Trade_Value"]
