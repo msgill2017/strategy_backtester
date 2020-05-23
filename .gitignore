@@ -92,3 +92,6 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# trade book
+Data/DLF-TRDBOOK-30-05-2019.csv
