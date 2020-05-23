@@ -40,10 +40,14 @@ def validate_input(data_df):
 
 
 def get_available_strike_price(df):
-    strike_price_range = df['Strike Price'].tolist()
-    print("Available Strike Price: ")
-    print(strike_price_range)
-    return strike_price_range
+    try:
+        strike_price_range = df['Strike Price'].tolist()
+        print("Available Strike Price: ")
+        print(strike_price_range)
+        return strike_price_range
+    except TypeError:
+        print("Oops!  That was no valid dataframe.  Try again...")
+
 
 
 def validate_or_update_values(inp_lst, data_df):

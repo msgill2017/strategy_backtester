@@ -26,7 +26,13 @@ class OrderTestSuite(unittest.TestCase):
         result = order.get_available_strike_price(df)
 
         self.assertEqual(data, result)
+        self.assertRaises(TypeError, order.get_available_strike_price(data))
 
+    def test_is_strike_price_available(self):
+        data = [210, 205, 200, 195, 190, 185, 180, 175, 170, 165]
+        sp = 205
+        result = order.is_strike_price_available(sp, data)
+        self.assertTrue(result)
 
 if __name__ == '__main__':
     unittest.main()
