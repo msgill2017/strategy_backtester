@@ -70,6 +70,24 @@ class OrderTestSuite(unittest.TestCase):
         out = {'Type': 'Long', 'Option': 'CE', 'Strike Price': '210.0', 'Premium': '1', 'Qty': '1'}
         self.assertEqual(order.user_response_to_order_dic(inp), out)
 
+    def test_user_input_type_and_option_purification(self):
+        o1 = {'Type': 'Long', 'Option': 'CE', 'Strike Price': '210.0', 'Premium': '1', 'Qty': '1'}
+        o2 = {'Type': 'Short', 'Option': 'PE', 'Strike Price': '210.0', 'Premium': '1', 'Qty': '1'}
+        o3 = {'Type': 'S', 'Option': 'Call', 'Strike Price': '210.0', 'Premium': '1', 'Qty': '1'}
+        o4 = {'Type': 'L', 'Option': 'Put', 'Strike Price': '210.0', 'Premium': '1', 'Qty': '1'}
+        o5 = {'Type': 'Other', 'Option': 'other', 'Strike Price': '210.0', 'Premium': '1', 'Qty': '1'}
+
+        self.assertTupleEqual(order.user_input_type_option_purification(o1, 'Type'), (True, 'Long'))
+        self.assertTupleEqual(order.user_input_type_option_purification(o2, 'Type'), (True, 'Short'))
+        self.assertTupleEqual(order.user_input_type_option_purification(o3, 'Type'), (True, 'Short'))
+        self.assertTupleEqual(order.user_input_type_option_purification(o4, 'Type'), (True, 'Long'))
+        self.assertTupleEqual(order.user_input_type_option_purification(o5, 'Type'), (False, ' '))
+
+        self.assertTupleEqual(order.user_input_type_option_purification(o1, 'Option'), (True, 'CE'))
+        self.assertTupleEqual(order.user_input_type_option_purification(o2, 'Option'), (True, 'PE'))
+        self.assertTupleEqual(order.user_input_type_option_purification(o3, 'Option'), (True, 'CE'))
+        self.assertTupleEqual(order.user_input_type_option_purification(o4, 'Option'), (True, 'PE'))
+        self.assertTupleEqual(order.user_input_type_option_purification(o5, 'Option'), (False, ' '))
 
 if __name__ == '__main__':
     unittest.main()

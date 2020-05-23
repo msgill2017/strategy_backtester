@@ -95,3 +95,6 @@ ENV/
 
 # trade book
 Data/DLF-TRDBOOK-30-05-2019.csv
+
+#just to run sample code
+test.py

@@ -23,8 +23,9 @@ def order_place(data_df):
 
 
 def validate_input(data_df):
-    uprice = data_df['Underlying'].values[0]
-    print("Underlying Price: ", uprice)
+    up = data_df['Underlying'].values[0]
+    print("Underlying Price: ", up)
+
     get_available_strike_price(data_df)
     while True:
         print("Enter the Order in given format Long/Short Call/Put Strike_Price Premium Lot_Qty (long call 210 12.0 1) ")
@@ -35,9 +36,7 @@ def validate_input(data_df):
         if all(cond):
             order = user_response_to_order_dic(inp)
             validate_or_update_values(order, data_df)
-            print("your in trade")
-            print(inp)
-            return inp
+            return order
 
 
 def user_response_to_order_dic(res):
@@ -59,81 +58,70 @@ def get_available_strike_price(df):
         print("Oops!  That was no valid dataframe.  Try again...")
 
 
-def validate_or_update_values(inp_lst, data_df):
-    validate_trade_value(inp_lst)
-    validate_option_value(inp_lst)
-    validate_strike_price_value(inp_lst, data_df)
-    validate_premium_value(inp_lst, data_df)
-    validate_lot_qty_value(inp_lst)
+def validate_or_update_values(user_input, data_df):
+    validate_type_and_option_value(user_input, 'Type')
+    validate_type_and_option_value(user_input, 'Option')
+    validate_strike_price_value(user_input, data_df)
+    validate_premium_value(user_input, data_df)
+    validate_lot_qty_value(user_input)
 
 
-def validate_trade_value(lst):
-        if lst and lst[0][0].upper() == 'L':
-            lst[0] = 'Long'
-        elif lst and lst[0][0].upper() == 'S':
-            lst[0] = 'Short'
-        else:
-            while True:
-                res = message("Updated trade type:")
-                if res and res[0].upper() == 'L':
-                    lst[0] = 'Long'
-                    break
-                elif res and res[0].upper() == 'S':
-                    lst[0] = 'Short'
-                    break
+def validate_type_and_option_value(order, k):
 
-
-def validate_option_value(lst):
-    if lst and lst[1][0].upper() == 'C':
-        lst[1] = 'CE'
-    elif lst and lst[1][0].upper() == 'P':
-        lst[1] = 'PE'
+    if user_input_type_option_purification(order, k)[0]:
+        order[k] = user_input_type_option_purification(order, k)[1]
     else:
         while True:
-            res = message("Updated Option type:")
-            if res and res[1].upper() == 'C':
-                lst[1] = 'CE'
-                break
-            elif res and res[0].upper() == 'P':
-                lst[1] = 'PE'
+            res = message("Updated {}".format(k))
+            if user_input_type_option_purification(res, k)[0]:
+                order[k] = user_input_type_option_purification(order, k)[1]
                 break
 
 
-def validate_strike_price_value(lst, data_df):
+def user_input_type_option_purification(o, k):
+    if o[k][0].upper() not in ['L', 'S', 'C', 'P']:
+        return False, ' '
+    else:
+        return{'L': (True, 'Long'), 'S': (True, 'Short'),
+               'C': (True, 'CE'), 'P': (True, 'PE')}[o and o[k][0].upper()]
+
+
+def validate_strike_price_value(order, data_df):
+    sp = order['Strike Price']
     sp_lst = get_available_strike_price(data_df)
-    if is_inp_str_number(lst[2]):
-        if is_strike_price_available(lst[2], sp_lst):
-            lst[2] = float(lst[2])
+    if is_inp_str_number(sp):
+        if is_strike_price_available(sp, sp_lst):
+            order['Strike Price'] = float(sp)
         else:
             while True:
-                res = message("Updated Strike Price:")
-                if is_inp_str_number(res):
-                    if is_strike_price_available(res, sp_lst):
-                        lst[2] = float(res)
+                inp = message("Updated Strike Price:")
+                if is_inp_str_number(inp):
+                    if is_strike_price_available(inp, sp_lst):
+                        order['Strike Price'] = float(inp)
                         break
 
 
-def validate_premium_value(lst, data_df):
-    if is_inp_str_number(lst[3]):
-        if is_premium_available(lst, lst[3], data_df):
-            lst[3] = float(lst[3])
+def validate_premium_value(order, data_df):
+    if is_inp_str_number(order['Premium']):
+        if is_premium_available(order, order['Premium'], data_df):
+            order['Premium'] = float(order['Premium'])
         else:
             while True:
                 res = message("Updated Premium Price:")
                 if is_inp_str_number(res):
-                    if is_premium_available(lst, res, data_df):
-                        lst[3] = float(res)
+                    if is_premium_available(order, res, data_df):
+                        order['Premium'] = float(res)
                         break
 
 
-def validate_lot_qty_value(lst):
-    if is_inp_str_number(lst[4]):
-        lst[4] = int(lst[4])
+def validate_lot_qty_value(order):
+    if is_inp_str_number(order['Qty']):
+        order['Qty'] = int(order['Qty'])
     else:
         while True:
             res = message("Updated Lot qty:")
             if is_inp_str_number(res):
-                lst[4] = int(res)
+                order['Qty'] = int(res)
                 break
 
 
@@ -158,10 +146,10 @@ def message(msg):
     return input("Enter {} :".format(msg))
 
 
-def is_premium_available(lst, val, data_df):
-    col_lst = premium_cols(lst[1])
-    print(lst)
-    sp = lst[2]
+def is_premium_available(o, val, data_df):
+    col_lst = premium_cols(o['Option'])
+
+    sp = o['Strike Price']
     pr = premium_range(data_df, col_lst, sp)
     print(pr)
 

@@ -46,14 +46,14 @@ def save_df(df, sym, exp):
     df.to_csv(file_path, index=False)
 
 
-def list_to_df(lst):
+def dic_to_df(o):
     # df col. = Contract Name,Open Date,Qty,Type,Adj. Cost
     # lst ['Long', 'CE', 210.0, 1.2, 1, '2019-04-26']
-    contract_name = '{}-{}-{}'.format(symbol, str(lst[2]), lst[1])
-    date = lst[5]
-    qty = lst[4] * lot_size
-    ty = lst[0]
-    adj_cost = qty * lst[3]
+    contract_name = '{}-{}-{}'.format(symbol, o['Strike Price'], o['Option'])
+    date = o['Date']
+    qty = o['Qty'] * lot_size
+    ty = o['Type']
+    adj_cost = qty * o['Premium']
 
     lst_update = [contract_name, date, qty, ty, adj_cost]
 

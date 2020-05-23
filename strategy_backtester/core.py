@@ -10,7 +10,7 @@ email : msg8930@yahoo.com
 """
 
 from strategy_backtester.commons import open_file, trade_book, trading_days, exit_loop, save_df,\
-                    list_to_df, no_trade_entry
+                    dic_to_df, no_trade_entry
 from strategy_backtester.config import symbol, expiry_date, data_dir
 from strategy_backtester.portfolio_balance import portfolio_balance
 from strategy_backtester.order import order_place
@@ -43,14 +43,14 @@ for day in remaining_working_days:
     # print(current_day_optionchain_df)
     while True:
 
-        trade = input("Are you interested in Trade Today (Yes or No) oR Enter (Exit or e) for Exit:")
+        trade = input("Are you interested in Trade Today (Yes or No) oR (Exit or e) for Exit:")
         order = []
         if trade == '' or trade[0].upper() == 'Y':
 
             order = order_place(current_day_option_chain_df)
-            order.append(day)
-            # print(order)
-            order_df = list_to_df(order)
+            order['Date'] =day
+            print(order)
+            order_df = dic_to_df(order)
 
             trade_book = trade_book.append(order_df, sort=False, ignore_index=True)
             # print(trade_book)
