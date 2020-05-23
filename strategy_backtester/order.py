@@ -49,7 +49,6 @@ def get_available_strike_price(df):
         print("Oops!  That was no valid dataframe.  Try again...")
 
 
-
 def validate_or_update_values(inp_lst, data_df):
     validate_trade_value(inp_lst)
     validate_option_value(inp_lst)
@@ -152,12 +151,22 @@ def message(msg):
 def is_premium_available(lst, val, data_df):
 
     filter_sp_row = data_df['Strike Price'] == lst[2]
-    col_lst = ['CE High', 'CE Low'] if lst[1] == 'CE' else ['PE High', 'PE Low']
-
+    col_lst = premium_cols(lst[1])
     premium_range = data_df.loc[filter_sp_row, col_lst].values[0]
     print(premium_range)
+    return check_premium_in_high_low(val, premium_range)
 
-    if premium_range[1] <= float(val) <= premium_range[0]:
+
+def premium_cols(option):
+    option = option.upper()
+    if option in ['CE', 'PE']:
+        return ['CE High', 'CE Low'] if option == 'CE' else ['PE High', 'PE Low']
+    else:
+        raise ValueError('could not find {} in [CE , PE]'.format(option))
+
+
+def check_premium_in_high_low(pre, lst):
+    if lst[1] <= float(pre) <= lst[0]:
         return True
     return False
 
