@@ -12,7 +12,7 @@ with open('LICENSE') as f:
     license = f.read()
 
 setup(
-    name='strategy_back-tester',
+    name='strategy_backtester',
     version='0.1.0',
     description='Manual option Strategy Back-tester',
     long_description=readme,

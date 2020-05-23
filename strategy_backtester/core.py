@@ -9,13 +9,15 @@ email : msg8930@yahoo.com
 
 """
 
-from commons import open_file, trade_book, trading_days, exit_loop, save_df,\
+from strategy_backtester.commons import open_file, trade_book, trading_days, exit_loop, save_df,\
                     list_to_df, no_trade_entry
-from config import symbol, expiry_date
-from portfolio_balance import portfolio_balance
-from order import order_place
+from strategy_backtester.config import symbol, expiry_date, data_dir
+from strategy_backtester.portfolio_balance import portfolio_balance
+from strategy_backtester.order import order_place
 
-option_chain_df = open_file("Data/{}-OPTSTK-{}.csv".format(symbol, expiry_date))
+filename = data_dir + '/{}-OPTSTK-{}.csv'.format(symbol, expiry_date)
+
+option_chain_df = open_file(filename)
 
 working_days = trading_days(option_chain_df)
 

@@ -8,7 +8,16 @@ Created on Sun May 14 2020
 email : msg8930@yahoo.com
 
 """
+import os.path
+# import sys
+# import os
 
+
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+data_dir = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'Data'))
+print(ROOT_DIR)
+print(data_dir)
 symbol = 'DLF'
 expiry_date = '30-05-2019'
 lot_size = 2600

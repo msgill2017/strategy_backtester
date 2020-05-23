@@ -16,7 +16,7 @@ except ImportError:
     pass
 
 
-from config import TRADE_BOOK_COL, lot_size, symbol
+from strategy_backtester.config import TRADE_BOOK_COL, lot_size, symbol, data_dir
 
 
 pd.set_option('display.max_columns', None)
@@ -41,7 +41,7 @@ def trade_book(sym, exp):
 
 
 def save_df(df, sym, exp):
-    file_path = "Data/{}-TRDBOOK-{}.csv".format(sym, exp)
+    file_path = data_dir + "/{}-TRDBOOK-{}.csv".format(sym, exp)
     print("Trade Book is Saving at this location {}".format(file_path))
     df.to_csv(file_path, index=False)
 
