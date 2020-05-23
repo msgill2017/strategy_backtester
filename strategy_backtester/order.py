@@ -9,7 +9,7 @@ email : msg8930@yahoo.com
 
 """
 from re import compile as re_compile
-
+from strategy_backtester.config import ORDER_COL
 
 try:
     import pandas as pd
@@ -33,10 +33,20 @@ def validate_input(data_df):
         cond = [inp, len(inp) == 5]
 
         if all(cond):
-            validate_or_update_values(inp, data_df)
+            order = user_response_to_order_dic(inp)
+            validate_or_update_values(order, data_df)
             print("your in trade")
             print(inp)
             return inp
+
+
+def user_response_to_order_dic(res):
+
+    # Create a zip object from two lists
+    zipbObj = zip(ORDER_COL, res)
+
+    # Create a dictionary from zip object
+    return dict(zipbObj)
 
 
 def get_available_strike_price(df):
@@ -149,12 +159,13 @@ def message(msg):
 
 
 def is_premium_available(lst, val, data_df):
-
-    filter_sp_row = data_df['Strike Price'] == lst[2]
     col_lst = premium_cols(lst[1])
-    premium_range = data_df.loc[filter_sp_row, col_lst].values[0]
-    print(premium_range)
-    return check_premium_in_high_low(val, premium_range)
+    print(lst)
+    sp = lst[2]
+    pr = premium_range(data_df, col_lst, sp)
+    print(pr)
+
+    return is_premium_in_high_low(val, pr)
 
 
 def premium_cols(option):
@@ -165,8 +176,16 @@ def premium_cols(option):
         raise ValueError('could not find {} in [CE , PE]'.format(option))
 
 
-def check_premium_in_high_low(pre, lst):
+def is_premium_in_high_low(pre, lst):
     if lst[1] <= float(pre) <= lst[0]:
         return True
     return False
 
+
+def premium_range(df, col_lst, sp):
+    filter_sp_row = filter_strike_price_row(df, sp)
+    return df.loc[filter_sp_row, col_lst].values[0]
+
+
+def filter_strike_price_row(df, sp):
+    return df['Strike Price'] == sp

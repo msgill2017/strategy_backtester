@@ -56,14 +56,19 @@ class OrderTestSuite(unittest.TestCase):
         self.assertEqual(order.premium_cols('pe'), ['PE High', 'PE Low'])
         self.assertTrue('This is broken' in str(context.exception))
 
-    def test_check_premium_in_high_low(self):
+    def test_is_premium_in_high_low(self):
 
-        self.assertTrue(order.check_premium_in_high_low('25.3', [28, 22]))
-        self.assertFalse(order.check_premium_in_high_low('28.3', [28, 22]))
-        self.assertFalse(order.check_premium_in_high_low('21.8', [28, 22]))
-        self.assertTrue(order.check_premium_in_high_low('28', [28, 22]))
-        self.assertTrue(order.check_premium_in_high_low('22', [28, 22]))
-        self.assertTrue(order.check_premium_in_high_low(22, [28, 22]))
+        self.assertTrue(order.is_premium_in_high_low('25.3', [28, 22]))
+        self.assertFalse(order.is_premium_in_high_low('28.3', [28, 22]))
+        self.assertFalse(order.is_premium_in_high_low('21.8', [28, 22]))
+        self.assertTrue(order.is_premium_in_high_low('28', [28, 22]))
+        self.assertTrue(order.is_premium_in_high_low('22', [28, 22]))
+        self.assertTrue(order.is_premium_in_high_low(22, [28, 22]))
+
+    def test_user_response_to_order_dic(self):
+        inp = ['Long', 'CE', '210.0', '1', '1']
+        out = {'Type': 'Long', 'Option': 'CE', 'Strike Price': '210.0', 'Premium': '1', 'Qty': '1'}
+        self.assertEqual(order.user_response_to_order_dic(inp), out)
 
 
 if __name__ == '__main__':

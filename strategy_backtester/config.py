@@ -18,5 +18,5 @@ data_dir = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', 'Data
 symbol = 'DLF'
 expiry_date = '30-05-2019'
 lot_size = 2600
-
+ORDER_COL = ['Type', 'Option', 'Strike Price', 'Premium', 'Qty']
 TRADE_BOOK_COL = ["Contract_name", "Open_date", "Qty", "Type", "Trade_Value"]
