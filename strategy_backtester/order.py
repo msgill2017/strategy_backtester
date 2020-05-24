@@ -83,16 +83,15 @@ def validate_type_and_option_value(order, k):
 
 
 def user_input_type_option_purification(o, k, res=None):
-    if res:
-        val = res[0].upper()
-    else:
-        val = o[k][0].upper()
 
-    if val not in ['L', 'S', 'C', 'P']:
-        return False, ' '
+    val = res[0].upper() if res else o[k][0].upper()
+
+    if val in ['L', 'S'] and k == 'Type':
+        return {'L': (True, 'Long'), 'S': (True, 'Short')}[val]
+    elif val in ['C', 'P'] and k == 'Option':
+        return {'C': (True, 'CE'), 'P': (True, 'PE')}[val]
     else:
-        return{'L': (True, 'Long'), 'S': (True, 'Short'),
-               'C': (True, 'CE'), 'P': (True, 'PE')}[val]
+        return False, ' '
 
 
 def validate_strike_price_premium_lot_qty(user_inp, df, k):
@@ -104,7 +103,8 @@ def validate_strike_price_premium_lot_qty(user_inp, df, k):
 
 
 def validate_strike_price_value(order, data_df):
-    sp = order['Strike Price']
+    sp = str(order['Strike Price'])
+    print(type(sp))
     sp_lst = get_available_strike_price(data_df)
     if is_inp_str_number(sp):
         if is_strike_price_available(sp, sp_lst):
@@ -137,9 +137,9 @@ def validate_lot_qty_value(order):
         order['Qty'] = int(order['Qty'])
     else:
         while True:
-            res = message("Updated Lot qty:")
-            if is_inp_str_number(res):
-                order['Qty'] = int(res)
+            r = message("Updated Lot qty:")
+            if is_inp_str_number(r):
+                order['Qty'] = int(r)
                 break
 
 

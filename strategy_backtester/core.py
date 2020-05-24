@@ -48,7 +48,7 @@ for day in remaining_working_days:
         if trade == '' or trade[0].upper() == 'Y':
 
             order = order_place(current_day_option_chain_df)
-            order['Date'] =day
+            order['Date'] = day
             print(order)
             order_df = dic_to_df(order)
 
