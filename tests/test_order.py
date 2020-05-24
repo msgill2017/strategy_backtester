@@ -70,6 +70,7 @@ class OrderTestSuite(unittest.TestCase):
         out = {'Type': 'Long', 'Option': 'CE', 'Strike Price': '210.0', 'Premium': '1', 'Qty': '1'}
         self.assertEqual(order.user_response_to_order_dic(inp), out)
 
+
     def test_user_input_type_and_option_purification(self):
         o1 = {'Type': 'Long', 'Option': 'CE', 'Strike Price': '210.0', 'Premium': '1', 'Qty': '1'}
         o2 = {'Type': 'Short', 'Option': 'PE', 'Strike Price': '210.0', 'Premium': '1', 'Qty': '1'}
