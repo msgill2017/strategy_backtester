@@ -9,6 +9,8 @@ email : msg8930@yahoo.com
 
 """
 import os.path
+from re import compile as re_compile
+
 
 try:
     import pandas as pd
@@ -76,7 +78,20 @@ def trading_days(df, col="Date"):
     try:
         days_row = df['{}'.format(col)].tolist()
         [days.append(x) for x in days_row if x not in days]
-    except:
-        days =[]
+    except None:
+        days = []
     return days
 
+comp = re_compile("^\d+?\.\d+?$")
+
+
+def is_inp_str_number(s):
+    """ Returns True is string is a number. """
+    if not s:
+        return False
+    try:
+        if comp.match(s) is None:
+            return s.isdigit()
+    except:
+        print("Enter value must be string, Value received {}, type of {}".format(s, type(s)))
+    return True
