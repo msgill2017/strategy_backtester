@@ -72,8 +72,8 @@ def user_response_to_dic(res):
 
 def validate_order_values(user_input, data_df):
     order = {}
-    # for k in ['Type']:
-    for k in ORDER_COL:
+    for k in ['Type', 'Option', 'Strike Price', 'Premium']:
+    # for k in ORDER_COL:
         order[k] = validate_and_update(user_input, data_df, k)
     return order
 
@@ -109,8 +109,27 @@ def user_input_type_option_purification(o, k, res=None):
         return False, ' '
 
 
+def request_user_updated_input(func, order, key, df=None):
+
+    r = message("Updated {}".format(key))
+    if key in ['Strike Price', 'Premium', 'Qty']:
+        val = {'Strike Price': func(order, df, res=r), 'Premium': validate_premium_price(order, df, res=r),
+               'Qty': validate_qty_value(order, res=r)}[key]
+        if is_inp_str_number(r) and val[0]:
+            return True, val[1]
+        else:
+            return False, ' '
+    elif func(order, key, res=r)[0]:
+        return True, func(order, key, res=r)[1]
+    return False, ' '
+
+
 def validate_non_str_values(func, order, df, k):
-    val = {'Strike Price': func(order=order, option_df=df), 'Premium': func(order, df), 'Qty': func(order)}[k]
+    if k == 'Qty':
+        val = func(order=order)
+    else:
+        val = func(order=order, option_df=df)
+
     if is_inp_str_number(order[k]) and val[0]:
         return val[1]
     else:
@@ -118,21 +137,6 @@ def validate_non_str_values(func, order, df, k):
             user_res = request_user_updated_input(func=func, order=order, key=k, df=df)
             if user_res[0] is True:
                 return user_res[1]
-
-
-def request_user_updated_input(func, order, key, df=None):
-
-        r = message("Updated {}".format(key))
-        if key in ['Strike Price', 'Premium', 'Qty']:
-            val = {'Strike Price': func(order, df, res=r), 'Premium': validate_premium_price(order, df, res=r),
-                   'Qty': validate_qty_value(order, res=r)}[key]
-            if is_inp_str_number(r) and val[0]:
-                return True, val[1]
-            else:
-                return False, ' '
-        elif func(order, key, res=r)[0]:
-            return True, func(order, key, res=r)[1]
-        return False, ' '
 
 
 def get_validator(k):
