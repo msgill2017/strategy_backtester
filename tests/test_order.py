@@ -3,7 +3,8 @@ from unittest import TestCase
 
 from strategy_backtester.order import get_underline_price, get_strike_price,  \
     user_response_to_dic, user_input_type_option_purification, request_user_updated_input, \
-    validate_strike_price, validate_premium_price, premium_cols, premium_range, is_premium_in_range, validate_qty_value
+    validate_strike_price, validate_premium_price, premium_cols, premium_range, is_premium_in_range, \
+    validate_qty_value, empty_order
 
 import pytest
 
@@ -19,6 +20,9 @@ df = pd.read_csv(test_data_file_path)
 
 
 class TestOrder(TestCase):
+    # def test_empty_order(self):
+    #     assert empty_order() == 'aa'
+
     def test_get_underline_price(self):
         assert get_underline_price(df) == 174.3
 

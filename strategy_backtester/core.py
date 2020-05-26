@@ -13,7 +13,7 @@ from strategy_backtester.commons import open_file, trade_book, trading_days, exi
                     dic_to_df, no_trade_entry
 from strategy_backtester.config import symbol, expiry_date, data_dir
 from strategy_backtester.portfolio_balance import portfolio_balance
-from strategy_backtester.order import place_order
+from strategy_backtester.trade import place_trade
 
 filename = data_dir + '/{}-OPTSTK-{}.csv'.format(symbol, expiry_date)
 
@@ -47,7 +47,7 @@ for day in remaining_working_days:
         order = []
         if trade == '' or trade[0].upper() == 'Y':
 
-            order = place_order(current_day_option_chain_df)
+            order = place_trade(current_day_option_chain_df)
             order['Date'] = day
             print(order)
             # order_df = dic_to_df(order)
