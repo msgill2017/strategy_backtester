@@ -17,6 +17,13 @@ except ImportError:
     pass
 
 
+order = {}
+
+
+def get_order():
+    return order
+
+
 def place_order(data_df):
 
     return validate_user_input(data_df)
@@ -27,14 +34,15 @@ def validate_user_input(data_df):
     display_strike_price(data_df)
 
     while True:
-        print("Enter the Order in given format Long/Short Call/Put Strike_Price Premium Lot_Qty (long call 210 12.0 1) ")
+        print("Enter the user_input in given format Long/Short Call/Put Strike_Price Premium Lot_Qty "
+              "(long call 210 12.0 1) ")
         inp = list(input().split())
 
         cond = [inp, len(inp) == 5]
 
         if all(cond):
             o = user_response_to_dic(inp)
-            return validate_order_values(o, data_df)
+            return validate_user_input_values(o, data_df)
 
 
 def display_underline_price(df):
@@ -70,10 +78,9 @@ def user_response_to_dic(res):
     return dict(zipbObj)
 
 
-def validate_order_values(user_input, data_df):
-    order = {}
-    for k in ['Type', 'Option', 'Strike Price', 'Premium']:
-    # for k in ORDER_COL:
+def validate_user_input_values(user_input, data_df):
+    # for k in ['Type', 'Option', 'Strike Price', 'Premium']:
+    for k in ORDER_COL:
         order[k] = validate_and_update(user_input, data_df, k)
     return order
 
@@ -87,54 +94,54 @@ def validate_and_update(user_inp, df, k):
         return validate_non_str_values(validator_func, user_inp, df, k)
 
 
-def validate_str_values(func, order, k):
+def validate_str_values(func, user_input, k):
 
-    if func(order, k)[0]:
-        return func(order, k)[1]
+    if func(user_input, k)[0]:
+        return func(user_input, k)[1]
     else:
         while True:
-            user_res = request_user_updated_input(func=func, order=order, key=k)
+            user_res = request_user_updated_input(func=func, user_input=user_input, key=k)
             if user_res[0] is True:
                 return user_res[1]
 
 
-def user_input_type_option_purification(o, k, res=None):
-    val = res.upper() if res else o[k].upper()
+def user_input_type_option_purification(user_input, key, res=None):
+    val = res.upper() if res else user_input[key].upper()
 
-    if val in ['L', 'S', 'LONG', 'SHORT'] and k == 'Type':
+    if val in ['L', 'S', 'LONG', 'SHORT'] and key == 'Type':
         return {'L': (True, 'Long'), 'S': (True, 'Short')}[val[0]]
-    elif val in ['C', 'P', 'CE', 'PE', 'CALL', 'PUT'] and k == 'Option':
+    elif val in ['C', 'P', 'CE', 'PE', 'CALL', 'PUT'] and key == 'Option':
         return {'C': (True, 'CE'), 'P': (True, 'PE')}[val[0]]
     else:
         return False, ' '
 
 
-def request_user_updated_input(func, order, key, df=None):
+def request_user_updated_input(func, user_input, key, df=None):
 
     r = message("Updated {}".format(key))
     if key in ['Strike Price', 'Premium', 'Qty']:
-        val = {'Strike Price': func(order, df, res=r), 'Premium': validate_premium_price(order, df, res=r),
-               'Qty': validate_qty_value(order, res=r)}[key]
+        val = {'Strike Price': func(user_input, df, res=r), 'Premium': validate_premium_price(user_input, df, res=r),
+               'Qty': validate_qty_value(user_input, res=r)}[key]
         if is_inp_str_number(r) and val[0]:
             return True, val[1]
         else:
             return False, ' '
-    elif func(order, key, res=r)[0]:
-        return True, func(order, key, res=r)[1]
+    elif func(user_input, key, res=r)[0]:
+        return True, func(user_input, key, res=r)[1]
     return False, ' '
 
 
-def validate_non_str_values(func, order, df, k):
-    if k == 'Qty':
-        val = func(order=order)
+def validate_non_str_values(func, user_input, df, key):
+    if key == 'Qty':
+        val = func(user_input=user_input)
     else:
-        val = func(order=order, option_df=df)
+        val = func(user_input=user_input, option_df=df)
 
-    if is_inp_str_number(order[k]) and val[0]:
+    if is_inp_str_number(user_input[key]) and val[0]:
         return val[1]
     else:
         while True:
-            user_res = request_user_updated_input(func=func, order=order, key=k, df=df)
+            user_res = request_user_updated_input(func=func, user_input=user_input, key=key, df=df)
             if user_res[0] is True:
                 return user_res[1]
 
@@ -146,11 +153,13 @@ def get_validator(k):
             }[k]
 
 
-def validate_strike_price(order, option_df, res=None):
+def validate_strike_price(user_input, option_df, res=None):
     try:
-        sp = float(order['Strike Price'])
+        sp = float(user_input['Strike Price'])
     except:
-        print("validate_strike_price program expected Order_dic type but received {} with type of {} ".format(order, type(order)))
+        print("validate_strike_price program expected user_input_dic type but received {} with type of {} ".
+              format(user_input, type(user_input)))
+
     sp = float(res) if res else sp
     sp_lst = get_strike_price(option_df)
     if sp in sp_lst:
@@ -158,30 +167,30 @@ def validate_strike_price(order, option_df, res=None):
     return False, ' '
 
 
-def validate_premium_price(order, option_df, res=None):
+def validate_premium_price(user_input, option_df, res=None):
     try:
-        p = float(order['Premium'])
+        p = float(user_input['Premium'])
     except:
-        print("validate_strike_price program expected Order_dic type but received {} with type of {} ".format(order, type(order)))
+        print("validate_strike_price program expected user_input_dic type but received {} with type of {} ".format(user_input, type(user_input)))
     p = float(res) if res else p
-
-    if is_premium_available(order, p, option_df):
+    o = get_order()
+    if is_premium_available(o, p, option_df):
         return True, p
     return False, ' '
 
 
-def is_premium_available(order, premium, option_df):
-    col_lst = premium_cols(order['Option'])
-    sp = float(order['Strike Price'])
+def is_premium_available(updated_user_input, premium, option_df):
+    col_lst = premium_cols(updated_user_input['Option'])
+    sp = float(updated_user_input['Strike Price'])
     pr = premium_range(option_df, col_lst, sp)
 
     return is_premium_in_range(premium, pr)
 
 
 def premium_cols(option):
-    option = option.upper()
-    if option in ['CE', 'PE']:
-        return ['CE High', 'CE Low'] if option == 'CE' else ['PE High', 'PE Low']
+    option = option[0].upper()
+    if option in ['C', 'P']:
+        return ['CE High', 'CE Low'] if option == 'C' else ['PE High', 'PE Low']
     else:
         raise ValueError('could not find {} in [CE , PE]'.format(option))
 
@@ -197,11 +206,11 @@ def is_premium_in_range(premium, lst):
     return False
 
 
-def validate_qty_value(order, res=None):
+def validate_qty_value(user_input, res=None):
     try:
-        q = order['Qty']
+        q = user_input['Qty']
     except:
-        print("validate_strike_price program expected Order_dic type but received {} with type of {} ".format(order, type(order)))
+        print("validate_strike_price program expected user_input_dic type but received {} with type of {} ".format(user_input, type(user_input)))
     q = res if res else q
 
     if q.isnumeric():
