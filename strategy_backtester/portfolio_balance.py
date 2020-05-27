@@ -39,9 +39,9 @@ def portfolio_balance(portfolio, df, previous_date):
     print(combine_positions_df)
 
 
-def portfolio_positions(df):
+def portfolio_positions(trade_df):
     # print(df)
-    positions = df.groupby(['Contract_name', 'Type'], as_index=False).agg({'Qty': 'sum', 'Trade_Value': 'sum'})
+    positions = combine_same_contract(trade_df)
     positions.insert(3, 'Avg', (positions['Trade_Value'] / positions['Qty']))
     positions= positions.round(2)
     # print('Inside the sum')
@@ -49,6 +49,14 @@ def portfolio_positions(df):
     positions = positions[rearrange_col]
     # print(positions)
     return join_same_contract(positions)
+
+
+def combine_same_contract(trade_df):
+    c = trade_df.groupby(['Contract_name', 'Type'], as_index=False).agg({'Qty': 'sum', 'Trade_Value': 'sum'},
+                                                                        index=False)
+    r_c = ['Contract_name', 'Type', 'Qty', 'Trade_Value']
+
+    return c[r_c]
 
 
 def join_same_contract(df):
@@ -137,7 +145,7 @@ def realized_profit(df):
 
 
 def get_close_data(symbols, df):
-    sp = get_strike_price_from_contract_name(symbols)
+    sp = get_strike_price_list_from_contract_names(symbols)
     closes = []
     temp = df[df['Strike Price'].isin(sp)]
     temp = temp[['Strike Price', 'CE Close', 'PE Close']].reset_index()
@@ -155,8 +163,10 @@ def get_close_data(symbols, df):
     return pd.DataFrame(closes, columns=['Contract_name', 'Close'])
 
 
-def get_strike_price_list_from_contract_name(sym_lst):
+def get_strike_price_list_from_contract_names(sym_lst):
     sp = []
     for elem in sym_lst:
         sp.append(float(elem.split('-')[1]))
     return sp
+
+# p = portfolio_balance()
