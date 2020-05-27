@@ -77,12 +77,15 @@ def no_trade_entry(tb, date):
 
 def trading_days(df, col="Date"):
     days = []
+    if df.empty:
+        return days
     try:
         days_row = df['{}'.format(col)].tolist()
         [days.append(x) for x in days_row if x not in days]
     except None:
-        days = []
+        print("Expect the pandas dataframe, but received the {} type of {}".format(df, type(df)))
     return days
+
 
 comp = re_compile("^\d+?\.\d+?$")
 
