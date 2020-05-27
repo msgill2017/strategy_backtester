@@ -42,11 +42,7 @@ def portfolio_balance(portfolio, df, previous_date):
 def portfolio_positions(trade_df):
     # print(df)
     positions = combine_same_contract(trade_df)
-    positions.insert(3, 'Avg', (positions['Trade_Value'] / positions['Qty']))
-    positions= positions.round(2)
-    # print('Inside the sum')
-    rearrange_col = ['Contract_name', 'Type', 'Qty', 'Avg', 'Trade_Value']
-    positions = positions[rearrange_col]
+
     # print(positions)
     return join_same_contract(positions)
 
@@ -57,6 +53,13 @@ def combine_same_contract(trade_df):
     r_c = ['Contract_name', 'Type', 'Qty', 'Trade_Value']
 
     return c[r_c]
+
+
+def find_avg_and_add_col_to_df(combine_df):
+    combine_df.insert(3, 'Avg', (combine_df['Trade_Value'] / combine_df['Qty']))
+    r_c = ['Contract_name', 'Type', 'Qty', 'Avg', 'Trade_Value']
+    combine_df.round(2)
+    return combine_df[r_c]
 
 
 def join_same_contract(df):
