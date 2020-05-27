@@ -93,20 +93,20 @@ def validate(func, key, res, option_df, trade):
 
 def validate_type(res):
     res = res.upper()
-    if res in ['BUY', 'SELL']:
+    if res and res in ['BUY', 'SELL']:
         return True, res
     return False, 'Sell or Buy'
 
 
 def validate_option(res):
     res = res.upper()
-    if res in ['CALL', 'PUT']:
+    if res and res in ['CALL', 'PUT']:
         return True, 'CE' if res == 'CALL' else 'PE'
     return False, 'CALL or PUT'
 
 
 def validate_strike_price(res, option_df, user_trade=None):
-    if is_inp_str_number(res):
+    if is_inp_str_number(res) and res:
         try:
             sp = float(res)
         except:
@@ -120,16 +120,17 @@ def validate_strike_price(res, option_df, user_trade=None):
 
 
 def validate_premium(res, option_df, user_trade=None):
-    if is_inp_str_number(res):
+    sp = user_trade['Strike Price']
+    op = user_trade['Option']
+    col_lst = premium_cols(op)
+    pr = premium_range(option_df, col_lst, sp)
+    if is_inp_str_number(res) and res:
         try:
             p = float(res)
         except:
             print("validate_premium function expected number str but received {} with type of {} ".format(
                 res, type(res)))
-        sp = user_trade['Strike Price']
-        op = user_trade['Option']
-        col_lst = premium_cols(op)
-        pr = premium_range(option_df, col_lst, sp)
+
         if is_premium_in_range(res, pr):
             return True, p
     return False, ' Premium within range {} '.format(pr)

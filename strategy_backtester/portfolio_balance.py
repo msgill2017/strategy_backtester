@@ -30,7 +30,7 @@ def portfolio_balance(portfolio, df, previous_date):
     #
     current_close_value_df = get_close_data(symbols, df)
     portfolio_positions_df = merge_df(portfolio_positions_df, current_close_value_df)
-    print(portfolio_positions_df)
+    # print(portfolio_positions_df)
     r_pnl_df = realized_profit(portfolio_positions_df)
     portfolio_positions_df = merge_df(portfolio_positions_df, r_pnl_df)
     #
@@ -47,7 +47,7 @@ def portfolio_positions(df):
     # print('Inside the sum')
     rearrange_col = ['Contract_name', 'Type', 'Qty', 'Avg', 'Trade_Value']
     positions = positions[rearrange_col]
-    print(positions)
+    # print(positions)
     return join_same_contract(positions)
 
 
@@ -58,8 +58,8 @@ def join_same_contract(df):
     for t in trades:
         temp_df = df[df['Type'] == t]
         del temp_df['Type']
-        print('temp_df')
-        print(temp_df)
+        # print('temp_df')
+        # print(temp_df)
         h_q = '{}_Qty'.format(t)
         h_a = '{}_Avg'.format(t)
         h_v = '{}_Value'.format(t)
