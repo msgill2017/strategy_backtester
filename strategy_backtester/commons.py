@@ -45,8 +45,9 @@ def trade_book(sym, exp):
 def save_df(df, sym, exp):
     file_path = data_dir + "/{}-TRDBOOK-{}.csv".format(sym, exp)
     print("Trade Book is Saving at this location {}".format(file_path))
-    df.to_csv(file_path, index=False)
-
+    with open(file_path, 'a') as f:
+        df.to_csv(f, header=f.tell() == 0, index=False)
+   
 
 def dic_to_df(o):
     # df col. = Contract Name,Open Date,Qty,Type,Adj. Cost
@@ -55,9 +56,10 @@ def dic_to_df(o):
     date = o['Date']
     qty = o['Qty'] * lot_size
     ty = o['Type']
+    p = o['Premium']
     adj_cost = qty * o['Premium']
 
-    lst_update = [contract_name, date, qty, ty, adj_cost]
+    lst_update = [contract_name, date, ty, qty, p, adj_cost]
 
     return pd.DataFrame([lst_update], columns=TRADE_BOOK_COL)
 
