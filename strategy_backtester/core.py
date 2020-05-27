@@ -9,7 +9,7 @@ email : msg8930@yahoo.com
 
 """
 
-from strategy_backtester.commons import open_file, trade_book, trading_days, exit_loop, save_df,\
+from strategy_backtester.commons import open_file, open_trade_book, trading_days, exit_loop, save_df,\
                     dic_to_df, no_trade_entry
 from strategy_backtester.config import symbol, expiry_date, data_dir
 from strategy_backtester.portfolio_balance import portfolio_balance
@@ -21,7 +21,7 @@ option_chain_df = open_file(filename)
 
 working_days = trading_days(option_chain_df)
 
-trade_book = trade_book(symbol, expiry_date)
+trade_book = open_trade_book(symbol, expiry_date)
 
 already_trade_days = trading_days(trade_book, col='Open_date')
 

@@ -22,8 +22,7 @@ class TestCommons(TestCase):
             df = pd.read_csv(option_file)
             tr_date_df = pd.read_csv(trade_file)
         except IOError:
-            print
-            'cannot open file'
+            print('cannot open file')
         self.fixture_df = df
         self.fixture_tr_date_df = tr_date_df
 

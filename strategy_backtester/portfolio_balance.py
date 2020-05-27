@@ -137,7 +137,7 @@ def realized_profit(df):
 
 
 def get_close_data(symbols, df):
-    sp = symbol_to_strike_price(symbols)
+    sp = get_strike_price_from_contract_name(symbols)
     closes = []
     temp = df[df['Strike Price'].isin(sp)]
     temp = temp[['Strike Price', 'CE Close', 'PE Close']].reset_index()
@@ -155,8 +155,8 @@ def get_close_data(symbols, df):
     return pd.DataFrame(closes, columns=['Contract_name', 'Close'])
 
 
-def symbol_to_strike_price(sym):
+def get_strike_price_list_from_contract_name(sym_lst):
     sp = []
-    for elem in sym:
-        sp.append(elem.split('-')[1])
+    for elem in sym_lst:
+        sp.append(float(elem.split('-')[1]))
     return sp

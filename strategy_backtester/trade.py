@@ -11,7 +11,7 @@ email : msg8930@yahoo.com
 from strategy_backtester.config import TRADE_COL
 from strategy_backtester.commons import is_inp_str_number
 
-from strategy_backtester.commons import open_file, trade_book, trading_days, exit_loop, save_df,\
+from strategy_backtester.commons import open_file, open_trade_book, trading_days, exit_loop, save_df,\
                     dic_to_df, no_trade_entry
 from strategy_backtester.config import symbol, expiry_date, data_dir
 
