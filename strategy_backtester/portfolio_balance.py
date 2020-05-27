@@ -52,7 +52,7 @@ def portfolio_positions(df):
 
 
 def join_same_contract(df):
-    trades = ['Long', 'Short']
+    trades = ['Buy', 'Sell']
     pos = {}
 
     for t in trades:
@@ -66,7 +66,7 @@ def join_same_contract(df):
         temp_df.columns = ['Contract_name', h_q, h_a, h_v ]
         pos[t] = temp_df
 
-    return pos['Long'].merge(pos['Short'], on='Contract_name', how='outer').fillna(0.0)
+    return pos['Buy'].merge(pos['Sell'], on='Contract_name', how='outer').fillna(0.0)
 
 
 def merge_df(df1, df2):
@@ -75,7 +75,7 @@ def merge_df(df1, df2):
 
 def open_trade_positions(df):
 
-    df['Open_Qty'] = abs(df['Long_Qty'] - df['Short_Qty'])
+    df['Open_Qty'] = abs(df['Buy_Qty'] - df['Sell_Qty'])
     df['Type'] = find_pending_trade_type(df)
     return df
 
@@ -86,32 +86,32 @@ def common_elements(lst1, lst2):
 
 # Create a function to apply to each row of the data frame
 def find_pending_trade_type(df):
-    """ Find the trade value according to its sign like negative number means Short type
-    or positive number means Long """
-    df['Type'] = df['Long_Qty'] - df['Short_Qty']
+    """ Find the trade value according to its sign like negative number means Sell type
+    or positive number means Buy """
+    df['Type'] = df['Buy_Qty'] - df['Sell_Qty']
 
     return df['Type'].map(lambda val: check_trade_type(val))
 
 
 def check_trade_type(num):
     if num > 0:
-        return 'Long'
+        return 'Buy'
     elif num == 0:
         return 'None'
     else:
-        return 'Short'
+        return 'Sell'
 
 
 def un_realized_profit(df):
     unr_pnl_lst = []
     for row in df.itertuples():
         cn = row.Contract_name
-        if row.Type == 'Long':
-            val = (row.Long_Qty - row.Squared_Qty) * (row.Close - row.Long_Avg)
+        if row.Type == 'Buy':
+            val = (row.Buy_Qty - row.Squared_Qty) * (row.Close - row.Buy_Avg)
             val = round(val, 2)
             unr_pnl_lst.append([cn, val])
         else:
-            val = (row.Short_Qty - row.Squared_Qty) * (row.Short_Avg - row.Close)
+            val = (row.Sell_Qty - row.Squared_Qty) * (row.Sell_Avg - row.Close)
             val = round(val, 2)
             unr_pnl_lst.append([cn, val])
 
@@ -119,18 +119,18 @@ def un_realized_profit(df):
 
 
 def realized_profit(df):
-    closed_contract_filter = (df['Long_Qty'] > 0) & (df['Short_Qty'] > 0)
+    closed_contract_filter = (df['Buy_Qty'] > 0) & (df['Sell_Qty'] > 0)
     closed_df = df[closed_contract_filter]
     lists = []
     for row in closed_df.itertuples():
         cn = row.Contract_name
-        if row.Long_Qty < row.Short_Qty:
-            qty = row.Long_Qty
-            pnl = round(row.Long_Qty * (row.Short_Avg - row.Long_Avg), 2)
+        if row.Buy_Qty < row.Sell_Qty:
+            qty = row.Buy_Qty
+            pnl = round(row.Buy_Qty * (row.Sell_Avg - row.Buy_Avg), 2)
             lists.append([cn, qty, pnl])
         else:
-            qty = row.Short_Qty
-            pnl = round(row.Short_Qty * (row.Short_Avg - row.Long_Avg), 2)
+            qty = row.Sell_Qty
+            pnl = round(row.Sell_Qty * (row.Sell_Avg - row.Buy_Avg), 2)
             lists.append([cn, qty, pnl])
 
     return pd.DataFrame(lists, columns=['Contract_name', 'Squared_Qty', 'Realized_PnL'])

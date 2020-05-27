@@ -23,50 +23,7 @@ class TestOrder(TestCase):
     # def test_empty_order(self):
     #     assert empty_order() == 'aa'
 
-    def test_get_underline_price(self):
-        assert get_underline_price(df) == 174.3
 
-    def test_get_strike_price(self):
-        expected = [210, 205, 200, 195, 190, 185, 180, 175, 170, 165]
-
-        assert get_strike_price(df) == expected
-
-    def test_user_response_to_dic(self):
-        inp = ['Long', 'CE', '210.0', '1', '1']
-        expected = {'Type': 'Long', 'Option': 'CE', 'Strike Price': '210.0', 'Premium': '1', 'Qty': '1'}
-        result = user_response_to_dic(inp)
-        assert result == expected
-        for val in result:
-            assert type(val) == type('str')
-
-    def test_user_input_type_option_purification(self):
-        o1 = {'Type': 'Long', 'Option': 'CE', 'Strike Price': '210.0', 'Premium': '1', 'Qty': '1'}
-        o2 = {'Type': 'Short', 'Option': 'PE', 'Strike Price': '210.0', 'Premium': '1', 'Qty': '1'}
-        o3 = {'Type': 'S', 'Option': 'Call', 'Strike Price': '210.0', 'Premium': '1', 'Qty': '1'}
-        o4 = {'Type': 'L', 'Option': 'Put', 'Strike Price': '210.0', 'Premium': '1', 'Qty': '1'}
-        o5 = {'Type': 'wrong', 'Option': 'wrong', 'Strike Price': '210.0', 'Premium': '1', 'Qty': '1'}
-        o6 = {'Type': 'local', 'Option': 'copper', 'Strike Price': '210.0', 'Premium': '1', 'Qty': '1'}
-        o7 = {'Type': 'copper', 'Option': 'local', 'Strike Price': '210.0', 'Premium': '1', 'Qty': '1'}
-        assert user_input_type_option_purification(o1, 'Type') == (True, 'Long')
-        assert user_input_type_option_purification(o1, 'Option') == (True, 'CE')
-        assert user_input_type_option_purification(o2, 'Type') == (True, 'Short')
-        assert user_input_type_option_purification(o2, 'Option') == (True, 'PE')
-        assert user_input_type_option_purification(o3, 'Type') == (True, 'Short')
-        assert user_input_type_option_purification(o3, 'Option') == (True, 'CE')
-        assert user_input_type_option_purification(o4, 'Type') == (True, 'Long')
-        assert user_input_type_option_purification(o4, 'Option') == (True, 'PE')
-        assert user_input_type_option_purification(o5, 'Type') == (False, ' ')
-        assert user_input_type_option_purification(o5, 'Option') == (False, ' ')
-        assert user_input_type_option_purification(o6, 'Type') == (False, ' ')
-        assert user_input_type_option_purification(o6, 'Option') == (False, ' ')
-        assert user_input_type_option_purification(o7, 'Type') == (False, ' ')
-        assert user_input_type_option_purification(o7, 'Option') == (False, ' ')
-
-    # def test_request_user_updated_input(self, monkeypatch):
-    #     o1 = {'Type': 'Long', 'Option': 'CE', 'Strike Price': '210.0', 'Premium': '1', 'Qty': '1'}
-    #     o2 = {'Type': 'Short', 'Option': 'PE', 'Strike Price': '210.0', 'Premium': '1', 'Qty': '1'}
-    #     monkeypatch.setattr('builtins.input', lambda: "Mark")
-    #     assert request_user_updated_input(user_input_type_option_purification, 'Type') == (False, ' ')
 
     def test_validate_strike_price(self):
 

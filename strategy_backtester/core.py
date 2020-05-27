@@ -50,11 +50,11 @@ for day in remaining_working_days:
             order = place_trade(current_day_option_chain_df)
             order['Date'] = day
             print(order)
-            # order_df = dic_to_df(order)
-            # print(order_df)
-            # trade_book = trade_book.append(order_df, sort=False, ignore_index=True)
-            # # print(trade_book)
-            # portfolio_balance(trade_book, previous_day_option_chain_df, previous_day)
+            order_df = dic_to_df(order)
+            print(order_df)
+            trade_book = trade_book.append(order_df, sort=False, ignore_index=True)
+            # print(trade_book)
+            portfolio_balance(trade_book, previous_day_option_chain_df, previous_day)
 
         if exit_loop(trade):
             print("Exit")
@@ -62,11 +62,11 @@ for day in remaining_working_days:
 
         if trade and trade[0].upper() != 'Y':
 
-            # portfolio_balance(trade_book, previous_day_option_chain_df, previous_day)
-            #
-            # nte_df = no_trade_entry(trade_book, day)
-            # trade_book = trade_book.append(nte_df, sort=False, ignore_index=True)
-            # previous_day = day
+            portfolio_balance(trade_book, previous_day_option_chain_df, previous_day)
+
+            nte_df = no_trade_entry(trade_book, day)
+            trade_book = trade_book.append(nte_df, sort=False, ignore_index=True)
+            previous_day = day
             break
     if exit_loop(trade):
         save_df(trade_book, symbol, expiry_date)

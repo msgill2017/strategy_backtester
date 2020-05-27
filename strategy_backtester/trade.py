@@ -25,6 +25,23 @@ except ImportError:
     pass
 
 
+def display_underline_price(df):
+    print("Underlying Price: {}".format(get_underline_price(df)))
+
+
+def display_strike_price(df):
+    print("Available Strike Price: ")
+    print('{}'.format(get_strike_price(df)))
+
+
+def get_underline_price(df):
+    # return df['Underlying'].values[0]
+    try:
+        return df['Underlying'].values[0]
+    except :
+        print("Oops!  That was not valid dataframe.  Try again...")
+
+
 def get_strike_price(df):
     try:
         return df['Strike Price'].tolist()
@@ -33,9 +50,9 @@ def get_strike_price(df):
 
 
 def place_trade(option_df):
+    display_underline_price(option_df)
+    display_strike_price(option_df)
     trade = {}
-    # for k in ['Type', 'Option', 'Strike Price', 'Premium']:
-    # for key in ['Type', 'Option', 'Strike Price', 'Qty']:
     for key in TRADE_COL:
         res = input("Enter the Trade {}: ".format(key))
         validator = get_validator(key)
@@ -146,7 +163,3 @@ def validate_qty(res):
         return True, q
     return False, ' Qty with positive integer number only: '
 
-
-
-trade = place_trade(option_chain_df)
-print(trade)
