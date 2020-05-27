@@ -25,20 +25,6 @@ class TestOrder(TestCase):
 
 
 
-    def test_validate_strike_price(self):
-
-        # strike_price_available = [210, 205, 200, 195, 190, 185, 180, 175, 170, 165]
-        o1 = {'Type': 'Long', 'Option': 'CE', 'Strike Price': '210.0', 'Premium': '1', 'Qty': '1'}
-        o2 = {'Type': 'Short', 'Option': 'PE', 'Strike Price': '270.0', 'Premium': '1', 'Qty': '1'}
-        assert validate_strike_price(o1, df) == (True, 210.0)
-        assert validate_strike_price(o2, df) == (False, ' ')
-        assert validate_strike_price(o2, df, res='210') == (True, 210.0)
-        assert validate_strike_price(o2, df, res='268') == (False, ' ')
-
-    def test_premium_cols(self):
-
-        assert premium_cols('CE') == ['CE High', 'CE Low']
-        assert premium_cols('PE') == ['PE High', 'PE Low']
 
     def test_premium_range(self):
         call = ['CE High', 'CE Low']

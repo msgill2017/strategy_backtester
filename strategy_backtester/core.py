@@ -48,9 +48,10 @@ for day in remaining_working_days:
         if trade == '' or trade[0].upper() == 'Y':
 
             order = place_trade(current_day_option_chain_df)
+            print(order)
             order['Date'] = day
             order_df = dic_to_df(order)
-            # print(order_df)
+            print(order_df)
             trade_book = trade_book.append(order_df, sort=False, ignore_index=True)
             print('trade book', trade_book)
             portfolio_balance(trade_book, previous_day_option_chain_df, previous_day)
