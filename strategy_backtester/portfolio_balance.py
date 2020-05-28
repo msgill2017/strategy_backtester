@@ -15,10 +15,13 @@ try:
 except ImportError:
     pass
 
+from strategy_backtester.config import trade_book, combine_same_contract_col, \
+    find_avg_and_add_col_to_df_col, trade_types
+
 
 def portfolio_balance(portfolio, df, previous_date):
     print("Current Portfolio with Profit and Loss as on {}".format(previous_date))
-    symbols = portfolio['Contract_name'].unique().tolist()
+    symbols = portfolio[trade_book['Contract_name']].unique().tolist()
     if 'NO-TRADE-DAY' in symbols:
         symbols.remove('NO-TRADE-DAY')
     portfolio_positions_df = portfolio_positions(portfolio)
@@ -48,25 +51,24 @@ def portfolio_positions(trade_df):
 
 
 def combine_same_contract(trade_df):
-    c = trade_df.groupby(['Contract_name', 'Type'], as_index=False).agg({'Qty': 'sum', 'Trade_Value': 'sum'},
-                                                                        index=False)
-    r_c = ['Contract_name', 'Type', 'Qty', 'Trade_Value']
+    c = trade_df.groupby([trade_book['Contract_name'], trade_book['Type']], as_index=False)\
+        .agg({'Qty': 'sum', 'Trade_value': 'sum'}, index=False)
 
-    return c[r_c]
+    return c[combine_same_contract_col]
 
 
 def find_avg_and_add_col_to_df(combine_df):
-    combine_df.insert(3, 'Avg', (combine_df['Trade_Value'] / combine_df['Qty']))
-    r_c = ['Contract_name', 'Type', 'Qty', 'Avg', 'Trade_Value']
+    combine_df.insert(3, 'Avg', (combine_df[trade_book['Trade_value']] / combine_df[trade_book['Qty']]))
+
     combine_df.round(2)
-    return combine_df[r_c]
+    return combine_df[find_avg_and_add_col_to_df_col]
 
 
 def join_same_contract(df):
-    trades = ['Buy', 'Sell']
+
     pos = {}
 
-    for t in trades:
+    for t in trade_types:
         temp_df = df[df['Type'] == t]
         del temp_df['Type']
         # print('temp_df')

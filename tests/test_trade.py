@@ -15,7 +15,7 @@ class TestTrade(TestCase):
     def setUp(self):
         """ Your setUp """
         # test data file path, the fils is a csv file.
-        option_file = './Data/OPTSTK.csv'
+        option_file = './data/OPTSTK.csv'
         
         try:
             df = pd.read_csv(option_file)

@@ -1,6 +1,6 @@
 from unittest import TestCase
 from strategy_backtester.portfolio_balance import get_strike_price_list_from_contract_names, combine_same_contract, \
-    find_avg_and_add_col_to_df
+    find_avg_and_add_col_to_df, combine_same_contract_col, find_avg_and_add_col_to_df_col
 try:
     import pandas as pd
     import numpy as np
@@ -13,8 +13,8 @@ class TestPortfolioBalance(TestCase):
     def setUp(self):
         """ Your setUp """
         # test data file path, the fils is a csv file.
-        option_file = './Data/OPTSTK.csv'
-        trade_file = './Data/TRADEBOOK.csv'
+        option_file = './data/OPTSTK.csv'
+        trade_file = './data/TRADEBOOK.csv'
 
         try:
             df = pd.read_csv(option_file)
@@ -40,8 +40,7 @@ class TestPortfolioBalance(TestCase):
                         ['DLF-210.0-PE',  'BUY', 5200, 6240.0],
                         ['DLF-220.0-CE',  'SELL', 5200, 7800.0]
                         ]
-        c_col = ['Contract_name',  'Type',  'Qty',  'Trade_Value']
-        c_df = pd.DataFrame(c_lst, columns=c_col)
+        c_df = pd.DataFrame(c_lst, columns=combine_same_contract_col)
         assert c_df.equals(combine_same_contract(self.fixture_tb_df)) is True
         # assert_frame_equal(combine_same_contract(self.fixture_tb_df), expected_df)
 
@@ -52,8 +51,7 @@ class TestPortfolioBalance(TestCase):
             ['DLF-210.0-PE',  'BUY', 5200, 1.2, 6240.0],
             ['DLF-220.0-CE',  'SELL', 5200, 1.5, 7800.0]
                 ]
-        a_col = ['Contract_name', 'Type', 'Qty', 'Avg', 'Trade_Value']
-        a_df = pd.DataFrame(a_lst, columns=a_col)
+        a_df = pd.DataFrame(a_lst, columns=find_avg_and_add_col_to_df_col)
 
         c_df = combine_same_contract(self.fixture_tb_df)
 

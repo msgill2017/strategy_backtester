@@ -34,7 +34,7 @@ def open_file(filename):
 
 
 def open_trade_book(sym, exp):
-    file_path = "Data/{}-TRDBOOK-{}.csv".format(sym, exp)
+    file_path = "data/{}-TRDBOOK-{}.csv".format(sym, exp)
     if os.path.exists(file_path):
         return open_file(file_path)
     else:

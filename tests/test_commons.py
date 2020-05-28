@@ -15,8 +15,8 @@ class TestCommons(TestCase):
     def setUp(self):
         """ Your setUp """
         # test data file path, the fils is a csv file.
-        option_file = './Data/OPTSTK.csv'
-        trade_file = './Data/TRADEBOOKDATE.csv'
+        option_file = './data/OPTSTK.csv'
+        trade_file = './data/TRADEBOOKDATE.csv'
 
         try:
             df = pd.read_csv(option_file)
