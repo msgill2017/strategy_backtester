@@ -21,7 +21,7 @@ from strategy_backtester.config import trade_book, combine_same_contract_col, \
 
 def portfolio_balance(portfolio, df, previous_date):
     print("Current Portfolio with Profit and Loss as on {}".format(previous_date))
-    symbols = portfolio[trade_book['Contract_name']].unique().tolist()
+    symbols = get_contracts(portfolio)
     if 'NO-TRADE-DAY' in symbols:
         symbols.remove('NO-TRADE-DAY')
     portfolio_positions_df = portfolio_positions(portfolio)
@@ -40,6 +40,10 @@ def portfolio_balance(portfolio, df, previous_date):
     unr_pnl_df = un_realized_profit(portfolio_positions_df)
     combine_positions_df = merge_df(portfolio_positions_df, unr_pnl_df)
     print(combine_positions_df)
+
+
+def get_unique_contracts_lst(portfolio_df):
+    return portfolio_df[trade_book['Contract_name']].unique().tolist()
 
 
 def portfolio_positions(trade_df):

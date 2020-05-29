@@ -1,5 +1,5 @@
 from unittest import TestCase
-from strategy_backtester.portfolio_balance import get_strike_price_list_from_contract_names, combine_same_contract, \
+from strategy_backtester.portfolio_balance import get_unique_contracts_lst, get_strike_price_list_from_contract_names, combine_same_contract, \
     find_avg_and_add_col_to_df, combine_same_contract_col, find_avg_and_add_col_to_df_col
 try:
     import pandas as pd
@@ -27,6 +27,11 @@ class TestPortfolioBalance(TestCase):
     def tearDown(self):
         del self.fixture_df
         del self.fixture_tb_df
+
+    def test_get_unique_contracts_lst(self):
+        assert get_unique_contracts_lst(self.fixture_tb_df) == ['DLF-220.0-CE', 'DLF-210.0-PE', 'DLF-195.0-PE',
+                                                                'DLF-190.0-CE']
+        assert isinstance(get_unique_contracts_lst(self.fixture_tb_df), list) is True
 
     def test_get_strike_price_from_contract_name(self):
 
