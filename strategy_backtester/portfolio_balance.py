@@ -15,8 +15,8 @@ try:
 except ImportError:
     pass
 
-from strategy_backtester.config import trade_book, combine_same_contract_col, \
-    find_avg_and_add_col_to_df_col, trade_types
+from strategy_backtester.config import trade_book, trade_book_col, \
+    find_avg_and_add_col_to_df_col, trade_types, open_trade_positions_col
 
 
 def portfolio_balance(portfolio, df, previous_date):
@@ -46,19 +46,23 @@ def get_unique_contracts_lst(portfolio_df):
     return portfolio_df[trade_book['Contract_name']].unique().tolist()
 
 
-def portfolio_positions(trade_df):
-    # print(df)
-    positions = combine_same_contract(trade_df)
+def sort_df_with_column(df, column):
 
-    # print(positions)
+    return df.sort_values(by=column).reset_index(drop=True)
+
+
+def portfolio_positions(trade_df):
+
+    positions = sum_qty_and_trade_value_contracts(trade_df)
+
     return display_buy_and_sell_side_by_side(positions)
 
 
-def combine_same_contract(trade_df):
+def sum_qty_and_trade_value_contracts(trade_df):
     c = trade_df.groupby([trade_book['Contract_name'], trade_book['Type']], as_index=False)\
         .agg({'Qty': 'sum', 'Trade_value': 'sum'}, index=False)
 
-    return c[combine_same_contract_col]
+    return c[trade_book_col]
 
 
 def find_avg_and_add_col_to_df(combine_df):
@@ -89,10 +93,11 @@ def merge_df(df1, df2):
 
 
 def open_trade_positions(df):
-
-    df['Open_Qty'] = abs(df['Buy_Qty'] - df['Sell_Qty'])
-    df['Type'] = find_pending_trade(df)
-    return df
+    op_df = pd.DataFrame()
+    op_df[trade_book['Contract_name']] = df[trade_book['Contract_name']]
+    op_df['Open_Qty'] = abs(df['Buy_Qty'] - df['Sell_Qty'])
+    op_df['Type'] = find_pending_trade(df)
+    return op_df[open_trade_positions_col]
 
 
 def common_elements(lst1, lst2):
