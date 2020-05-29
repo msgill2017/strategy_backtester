@@ -91,7 +91,7 @@ def merge_df(df1, df2):
 def open_trade_positions(df):
 
     df['Open_Qty'] = abs(df['Buy_Qty'] - df['Sell_Qty'])
-    df['Type'] = find_pending_trade_type(df)
+    df['Type'] = find_pending_trade(df)
     return df
 
 
@@ -100,16 +100,16 @@ def common_elements(lst1, lst2):
 
 
 # Create a function to apply to each row of the data frame
-def find_pending_trade_type(df):
+def find_pending_trade(df):
     """ Find the trade value according to its sign like negative number means Sell type
     or positive number means Buy """
     df['Type'] = df['Buy_Qty'] - df['Sell_Qty']
 
-    return df['Type'].map(lambda val: check_trade_type(val))
+    return df['Type'].map(lambda val: trade_type_conversion(val))
 
 
-def check_trade_type(num):
-    if num > 0:
+def trade_type_conversion(num):
+    if num < 0:
         return 'Buy'
     elif num == 0:
         return 'None'
@@ -176,4 +176,3 @@ def get_strike_price_list_from_contract_names(sym_lst):
         sp.append(float(elem.split('-')[1]))
     return sp
 
-# p = portfolio_balance()

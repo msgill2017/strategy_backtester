@@ -1,6 +1,8 @@
 from unittest import TestCase
+
 from strategy_backtester.portfolio_balance import get_unique_contracts_lst, get_strike_price_list_from_contract_names, \
-    combine_same_contract, find_avg_and_add_col_to_df, display_buy_and_sell_side_by_side
+    combine_same_contract, find_avg_and_add_col_to_df, display_buy_and_sell_side_by_side, trade_type_conversion, \
+    find_pending_trade
 
 from strategy_backtester.config import combine_same_contract_col, find_avg_and_add_col_to_df_col, display_buy_and_sell_side_by_side_col
 try:
@@ -82,3 +84,15 @@ class TestPortfolioBalance(TestCase):
         a_df = find_avg_and_add_col_to_df(c_df)
 
         assert d_df.equals(display_buy_and_sell_side_by_side(a_df)) is True
+
+    def test_trade_type_conversion(self):
+        assert trade_type_conversion(-1) == 'Sell'
+        assert trade_type_conversion(1) == 'Buy'
+        assert trade_type_conversion(0) == 'None'
+
+    def test_find_pending_trade(self):
+        expected_res = pd.Series(['Sell', 'Buy', 'Sell', 'Buy', 'Buy'])
+        c_df = combine_same_contract(self.fixture_tb_df)
+        a_df = find_avg_and_add_col_to_df(c_df)
+        d_df = display_buy_and_sell_side_by_side(a_df)
+        pd.testing.assert_series_equal((find_pending_trade(d_df)), expected_res, check_names=False)
