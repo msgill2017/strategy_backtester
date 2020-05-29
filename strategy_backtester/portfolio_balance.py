@@ -156,13 +156,13 @@ def realized_profit(df):
     return pd.DataFrame(lists, columns=['Contract_name', 'Squared_Qty', 'Realized_PnL'])
 
 
-def get_close_data(symbols, df):
-    sp = get_strike_price_list_from_contract_names(symbols)
+def get_close_data(symbols_lst, df):
+    sp = get_strike_price_list_from_contract_names(symbols_lst)
     closes = []
     temp = df[df['Strike Price'].isin(sp)]
     temp = temp[['Strike Price', 'CE Close', 'PE Close']].reset_index()
 
-    for item in symbols:
+    for item in symbols_lst:
 
         lst = item.split('-')
 

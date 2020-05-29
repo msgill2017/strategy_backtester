@@ -100,5 +100,10 @@ class TestPortfolioBalance(TestCase):
         d_df = portfolio_balance.display_buy_and_sell_side_by_side(a_df)
         assert op_df.equals(portfolio_balance.open_trade_positions(d_df)) is True
 
-    # def test_get_close_data(self):
-    #     pass
+    def test_get_close_data(self):
+        expected_res1 = pd.DataFrame([['DLF-190.0-CE', 4.25]], columns=['Contract_name', 'Close'])
+        expected_res2 = pd.DataFrame([['DLF-195.0-PE', 3.35]], columns=['Contract_name', 'Close'])
+
+        assert expected_res1.equals(portfolio_balance.get_close_data(['DLF-190.0-CE'], self.fixture_df)) is True
+        assert expected_res2.equals(portfolio_balance.get_close_data(['DLF-195.0-PE'], self.fixture_df)) is True
+
