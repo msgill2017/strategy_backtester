@@ -25,6 +25,8 @@ trade_book = {'Contract_name': 'Contract_name', 'Open_date': 'Open_date', 'Type'
 
 trade_book_col = ['Contract_name', 'Open_date', 'Type', 'Qty', 'Premium', 'Trade_value']
 
+sum_qty_trade_value_col = ['Contract_name', 'Type', 'Qty', 'Trade_value']
+
 find_avg_and_add_col_to_df_col = ['Contract_name', 'Type', 'Qty', 'Avg', 'Trade_value']
 
 display_buy_and_sell_side_by_side_col = ['Contract_name', 'Buy_Qty', 'Buy_Avg', 'Buy_Value', 'Sell_Qty', 'Sell_Avg',

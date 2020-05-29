@@ -1,11 +1,7 @@
 from unittest import TestCase
 
-from strategy_backtester.portfolio_balance import get_unique_contracts_lst, get_strike_price_list_from_contract_names, \
-    sum_qty_and_trade_value_contracts, find_avg_and_add_col_to_df, display_buy_and_sell_side_by_side, trade_type_conversion, \
-    find_pending_trade, open_trade_positions, sort_df_with_column
-
-from strategy_backtester.config import trade_book_col, find_avg_and_add_col_to_df_col, \
-    display_buy_and_sell_side_by_side_col, open_trade_positions_col, trade_book
+from strategy_backtester import portfolio_balance
+from strategy_backtester import config
 
 from tests.data import trade_book_data
 
@@ -26,7 +22,7 @@ class TestPortfolioBalance(TestCase):
 
         try:
             df = pd.read_csv(option_file)
-            tb_df = pd.DataFrame(trade_book_data.trade_book_lst, columns=trade_book_col)
+            tb_df = pd.DataFrame(trade_book_data.trade_book_lst, columns=config.trade_book_col)
         except IOError:
             print('cannot open file')
         self.fixture_df = df
@@ -37,87 +33,72 @@ class TestPortfolioBalance(TestCase):
         del self.fixture_tb_df
 
     def test_get_unique_contracts_lst(self):
-        assert get_unique_contracts_lst(self.fixture_tb_df) == ['DLF-220.0-CE', 'DLF-210.0-PE', 'DLF-195.0-PE',
+        assert portfolio_balance.get_unique_contracts_lst(self.fixture_tb_df) == ['DLF-220.0-CE', 'DLF-210.0-PE', 'DLF-195.0-PE',
                                                                 'DLF-190.0-CE', 'DLF-200.0-PE']
-        assert isinstance(get_unique_contracts_lst(self.fixture_tb_df), list) is True
+        assert isinstance(portfolio_balance.get_unique_contracts_lst(self.fixture_tb_df), list) is True
 
     def test_get_strike_price_from_contract_name(self):
 
-        assert get_strike_price_list_from_contract_names(['DLF-220.0-CE']) == [220.0]
-        assert isinstance(get_strike_price_list_from_contract_names(['DLF-220.0-CE']), list) is True
+        assert portfolio_balance.get_strike_price_list_from_contract_names(['DLF-220.0-CE']) == [220.0]
+        assert isinstance(portfolio_balance.get_strike_price_list_from_contract_names(['DLF-220.0-CE']), list) is True
 
     def test_sort_df_with_column(self):
 
-        expected_df = pd.DataFrame(trade_book_data.expected_sorted_lst, columns=trade_book_col)
+        expected_df = pd.DataFrame(trade_book_data.expected_sorted_lst,
+                                   columns=config.trade_book_col)
         # print(expected_df)
-        assert expected_df.equals(sort_df_with_column(self.fixture_tb_df, column=trade_book['Contract_name'])) is True
+        assert expected_df.equals(portfolio_balance.sort_df_with_column(self.fixture_tb_df,
+                                                      column=config.trade_book['Contract_name'])) is True
 
     def test_sum_qty_and_trade_value_contracts(self):
-        c_lst = [
-                        ['DLF-190.0-CE',  'Buy', 2600, 3120.0],
-                        ['DLF-195.0-PE',  'Sell', 2600, 5200.0],
-                        ['DLF-200.0-PE',  'Buy', 2600, 3120.0],
-                        ['DLF-200.0-PE',  'Sell', 5200, 10400.0],
-                        ['DLF-210.0-PE',  'Buy', 5200, 6240.0],
-                        ['DLF-220.0-CE',  'Sell', 5200, 7800.0]
-                        ]
-        c_df = pd.DataFrame(c_lst, columns=trade_book_col)
-        assert c_df.equals(sum_qty_and_trade_value_contracts(self.fixture_tb_df)) is True
+
+        c_df = pd.DataFrame(trade_book_data.expected_sum_qty_trade_value_lst,
+                            columns=config.sum_qty_trade_value_col)
+        assert c_df.equals(portfolio_balance.sum_qty_and_trade_value_contracts(self.fixture_tb_df)) is True
         # assert_frame_equal(sum_qty_and_trade_value_contracts(self.fixture_tb_df), expected_df)
 
     def test_find_avg_and_add_col_to_df(self):
-        a_lst = [
-            ['DLF-190.0-CE',  'Buy', 2600, 1.2, 3120.0],
-            ['DLF-195.0-PE',  'Sell', 2600, 2.0, 5200.0],
-            ['DLF-200.0-PE', 'Buy', 2600,   1.2, 3120.0],
-            ['DLF-200.0-PE', 'Sell', 5200,  2.0, 10400.0],
-            ['DLF-210.0-PE',  'Buy', 5200, 1.2, 6240.0],
-            ['DLF-220.0-CE',  'Sell', 5200, 1.5, 7800.0]
-                ]
-        a_df = pd.DataFrame(a_lst, columns=find_avg_and_add_col_to_df_col)
 
-        c_df = sum_qty_and_trade_value_contracts(self.fixture_tb_df)
+        a_df = pd.DataFrame(trade_book_data.expected_avg_lst,
+                            columns=config.find_avg_and_add_col_to_df_col)
 
-        assert a_df.equals(find_avg_and_add_col_to_df(c_df)) is True
+        c_df = portfolio_balance.sum_qty_and_trade_value_contracts(self.fixture_tb_df)
+
+        assert a_df.equals(portfolio_balance.find_avg_and_add_col_to_df(c_df)) is True
         # assert_frame_equal(find_avg_and_add_col_to_df(c_df), a_df)
 
     def test_display_buy_and_sell_side_by_side(self):
-        d_lst = [
-                ['DLF-190.0-CE', 2600, 1.2, 3120.0, 0.0,    0.0, 0.0],
-                ['DLF-200.0-PE', 2600, 1.2, 3120.0, 5200.0, 2.0, 10400.0],
-                ['DLF-210.0-PE', 5200, 1.2, 6240.0, 0.0,    0.0, 0.0],
-                ['DLF-195.0-PE',  0.0, 0.0,  0.0,   2600.0, 2.0, 5200.0],
-                ['DLF-220.0-CE',  0.0, 0.0,  0.0,   5200.0, 1.5, 7800.0]
-                ]
-        d_df = pd.DataFrame(d_lst, columns=display_buy_and_sell_side_by_side_col)
-        c_df = sum_qty_and_trade_value_contracts(self.fixture_tb_df)
-        a_df = find_avg_and_add_col_to_df(c_df)
 
-        assert d_df.equals(display_buy_and_sell_side_by_side(a_df)) is True
+        d_df = pd.DataFrame(trade_book_data.expected_display_lst,
+                            columns=config.display_buy_and_sell_side_by_side_col)
+
+        c_df = portfolio_balance.sum_qty_and_trade_value_contracts(self.fixture_tb_df)
+
+        a_df = portfolio_balance.find_avg_and_add_col_to_df(c_df)
+
+        assert d_df.equals(portfolio_balance.display_buy_and_sell_side_by_side(a_df)) is True
 
     def test_trade_type_conversion(self):
-        assert trade_type_conversion(-1) == 'Sell'
-        assert trade_type_conversion(1) == 'Buy'
-        assert trade_type_conversion(0) == 'None'
+        assert portfolio_balance.trade_type_conversion(-1) == 'Buy'
+        assert portfolio_balance.trade_type_conversion(1) == 'Sell'
+        assert portfolio_balance.trade_type_conversion(0) == 'None'
 
     def test_find_pending_trade(self):
         expected_res = pd.Series(['Sell', 'Buy', 'Sell', 'Buy', 'Buy'])
-        c_df = sum_qty_and_trade_value_contracts(self.fixture_tb_df)
-        a_df = find_avg_and_add_col_to_df(c_df)
-        d_df = display_buy_and_sell_side_by_side(a_df)
-        pd.testing.assert_series_equal((find_pending_trade(d_df)), expected_res, check_names=False)
+        c_df = portfolio_balance.sum_qty_and_trade_value_contracts(self.fixture_tb_df)
+        a_df = portfolio_balance.find_avg_and_add_col_to_df(c_df)
+        d_df = portfolio_balance.display_buy_and_sell_side_by_side(a_df)
+        pd.testing.assert_series_equal((portfolio_balance.find_pending_trade(d_df)), expected_res,
+                                       check_names=False)
 
     def test_open_trade_positions(self):
-        op_lst = [
-            ['DLF-190.0-CE', 'Sell', 2600.0],
-            ['DLF-200.0-PE', 'Buy',  2600.0],
-            ['DLF-210.0-PE', 'Sell', 5200.0],
-            ['DLF-195.0-PE', 'Buy',  2600.0],
-            ['DLF-220.0-CE', 'Buy',  5200.0]
-        ]
 
-        op_df =  pd.DataFrame(op_lst, columns= open_trade_positions_col)
-        c_df = sum_qty_and_trade_value_contracts(self.fixture_tb_df)
-        a_df = find_avg_and_add_col_to_df(c_df)
-        d_df = display_buy_and_sell_side_by_side(a_df)
-        assert op_df.equals(open_trade_positions(d_df)) is True
+        op_df = pd.DataFrame(trade_book_data.expected_open_positions_lst,
+                              columns= config.open_trade_positions_col)
+        c_df = portfolio_balance.sum_qty_and_trade_value_contracts(self.fixture_tb_df)
+        a_df = portfolio_balance.find_avg_and_add_col_to_df(c_df)
+        d_df = portfolio_balance.display_buy_and_sell_side_by_side(a_df)
+        assert op_df.equals(portfolio_balance.open_trade_positions(d_df)) is True
+
+    # def test_get_close_data(self):
+    #     pass

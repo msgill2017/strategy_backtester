@@ -16,7 +16,7 @@ except ImportError:
     pass
 
 from strategy_backtester.config import trade_book, trade_book_col, \
-    find_avg_and_add_col_to_df_col, trade_types, open_trade_positions_col
+    find_avg_and_add_col_to_df_col, trade_types, open_trade_positions_col, sum_qty_trade_value_col
 
 
 def portfolio_balance(portfolio, df, previous_date):
@@ -62,7 +62,7 @@ def sum_qty_and_trade_value_contracts(trade_df):
     c = trade_df.groupby([trade_book['Contract_name'], trade_book['Type']], as_index=False)\
         .agg({'Qty': 'sum', 'Trade_value': 'sum'}, index=False)
 
-    return c[trade_book_col]
+    return c[sum_qty_trade_value_col]
 
 
 def find_avg_and_add_col_to_df(combine_df):
