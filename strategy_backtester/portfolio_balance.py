@@ -21,7 +21,7 @@ from strategy_backtester.config import trade_book, combine_same_contract_col, \
 
 def portfolio_balance(portfolio, df, previous_date):
     print("Current Portfolio with Profit and Loss as on {}".format(previous_date))
-    symbols = get_contracts(portfolio)
+    symbols = get_unique_contracts_lst(portfolio)
     if 'NO-TRADE-DAY' in symbols:
         symbols.remove('NO-TRADE-DAY')
     portfolio_positions_df = portfolio_positions(portfolio)
@@ -51,7 +51,7 @@ def portfolio_positions(trade_df):
     positions = combine_same_contract(trade_df)
 
     # print(positions)
-    return join_same_contract(positions)
+    return display_buy_and_sell_side_by_side(positions)
 
 
 def combine_same_contract(trade_df):
@@ -68,19 +68,17 @@ def find_avg_and_add_col_to_df(combine_df):
     return combine_df[find_avg_and_add_col_to_df_col]
 
 
-def join_same_contract(df):
+def display_buy_and_sell_side_by_side(df):
 
     pos = {}
 
     for t in trade_types:
-        temp_df = df[df['Type'] == t]
-        del temp_df['Type']
-        # print('temp_df')
-        # print(temp_df)
+        temp_df = df[df[trade_book['Type']] == t]
+        del temp_df[trade_book['Type']]
         h_q = '{}_Qty'.format(t)
         h_a = '{}_Avg'.format(t)
         h_v = '{}_Value'.format(t)
-        temp_df.columns = ['Contract_name', h_q, h_a, h_v ]
+        temp_df.columns = [trade_book['Contract_name'], h_q, h_a, h_v]
         pos[t] = temp_df
 
     return pos['Buy'].merge(pos['Sell'], on='Contract_name', how='outer').fillna(0.0)
