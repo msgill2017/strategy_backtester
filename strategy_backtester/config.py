@@ -19,7 +19,6 @@ symbol = 'DLF'
 expiry_date = '30-05-2019'
 lot_size = 2600
 TRADE_COL = ['Type', 'Option', 'Strike Price', 'Premium', 'Qty']
-TRADE_BOOK_COL = ['Contract_name', 'Open_date', 'Type', 'Qty', 'Premium', 'Trade_value']
 trade_book = {'Contract_name': 'Contract_name', 'Open_date': 'Open_date', 'Type': 'Type',
               'Qty': 'Qty', 'Premium': 'Premium', 'Trade_value': 'Trade_value'}
 

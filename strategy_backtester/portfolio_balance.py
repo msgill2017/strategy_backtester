@@ -15,47 +15,51 @@ try:
 except ImportError:
     pass
 
+
 from strategy_backtester.config import trade_book, trade_book_col, \
     find_avg_and_add_col_to_df_col, trade_types, open_trade_positions_col, sum_qty_trade_value_col
 
 
-def portfolio_balance(portfolio, df, previous_date):
+def previous_orders_from_trade_book(portfolio, df, previous_date):
     print("Current Portfolio with Profit and Loss as on {}".format(previous_date))
     symbols = get_unique_contracts_lst(portfolio)
     if 'NO-TRADE-DAY' in symbols:
         symbols.remove('NO-TRADE-DAY')
-    portfolio_positions_df = portfolio_positions(portfolio)
-    # print(portfolio_positions_df)
+    print(portfolio)
 
-    portfolio_positions_df = open_trade_positions(portfolio_positions_df)
-
-    # print(portfolio_positions_df)
-    #
-    current_close_value_df = get_close_data(symbols, df)
-    portfolio_positions_df = merge_df(portfolio_positions_df, current_close_value_df)
-    # print(portfolio_positions_df)
-    r_pnl_df = realized_profit(portfolio_positions_df)
-    portfolio_positions_df = merge_df(portfolio_positions_df, r_pnl_df)
-    #
-    unr_pnl_df = un_realized_profit(portfolio_positions_df)
-    combine_positions_df = merge_df(portfolio_positions_df, unr_pnl_df)
-    print(combine_positions_df)
+    return portfolio_positions(portfolio)
 
 
 def get_unique_contracts_lst(portfolio_df):
     return portfolio_df[trade_book['Contract_name']].unique().tolist()
 
-
-def sort_df_with_column(df, column):
-
-    return df.sort_values(by=column).reset_index(drop=True)
+# def portfolio_balance(portfolio, df, previous_date):
+#     print("Current Portfolio with Profit and Loss as on {}".format(previous_date))
+#
+#     # print(portfolio_positions_df)
+#
+#     portfolio_positions_df = open_trade_positions(portfolio_positions_df)
+#
+#     # print(portfolio_positions_df)
+#     #
+#     current_close_value_df = get_close_data(symbols, df)
+#     portfolio_positions_df = merge_df(portfolio_positions_df, current_close_value_df)
+#     # print(portfolio_positions_df)
+#     r_pnl_df = realized_profit(portfolio_positions_df)
+#     portfolio_positions_df = merge_df(portfolio_positions_df, r_pnl_df)
+#     #
+#     unr_pnl_df = un_realized_profit(portfolio_positions_df)
+#     combine_positions_df = merge_df(portfolio_positions_df, unr_pnl_df)
+#     print(combine_positions_df)
 
 
 def portfolio_positions(trade_df):
-
-    positions = sum_qty_and_trade_value_contracts(trade_df)
-
-    return display_buy_and_sell_side_by_side(positions)
+    print(trade_df)
+    combine_df = sum_qty_and_trade_value_contracts(trade_df)
+    print(combine_df)
+    avg_df = find_avg_and_add_col_to_df(combine_df)
+    print(avg_df)
+    return display_buy_and_sell_side_by_side(avg_df)
 
 
 def sum_qty_and_trade_value_contracts(trade_df):
@@ -72,12 +76,12 @@ def find_avg_and_add_col_to_df(combine_df):
     return combine_df[find_avg_and_add_col_to_df_col]
 
 
-def display_buy_and_sell_side_by_side(df):
+def display_buy_and_sell_side_by_side(trade_df):
 
     pos = {}
 
     for t in trade_types:
-        temp_df = df[df[trade_book['Type']] == t]
+        temp_df = trade_df[trade_df[trade_book['Type']] == t]
         del temp_df[trade_book['Type']]
         h_q = '{}_Qty'.format(t)
         h_a = '{}_Avg'.format(t)
@@ -86,6 +90,12 @@ def display_buy_and_sell_side_by_side(df):
         pos[t] = temp_df
 
     return pos['Buy'].merge(pos['Sell'], on='Contract_name', how='outer').fillna(0.0)
+
+
+def sort_df_with_column(df, column):
+
+    return df.sort_values(by=column).reset_index(drop=True)
+
 
 
 def merge_df(df1, df2):

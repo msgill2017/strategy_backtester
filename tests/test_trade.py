@@ -44,7 +44,7 @@ class TestTrade(TestCase):
         expected_input = ['BUY', 'Buy', 'buy','SELL','Sell','sell']
 
         for item in expected_input:
-            assert validate_type(item) == (True, item.upper())
+            assert validate_type(item) == (True, item.capitalize())
         assert validate_type('sall') == (False, 'Sell or Buy')
         assert isinstance(validate_type('Sell')[1], str) is True
 

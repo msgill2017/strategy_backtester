@@ -92,8 +92,8 @@ def validate(func, key, res, option_df, trade):
 
 
 def validate_type(res):
-    res = res.upper()
-    if res and res in ['BUY', 'SELL']:
+    res = res.capitalize()
+    if res and res in ['Buy', 'Sell']:
         return True, res
     return False, 'Sell or Buy'
 

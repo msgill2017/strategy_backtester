@@ -18,7 +18,7 @@ except ImportError:
     pass
 
 
-from strategy_backtester.config import TRADE_BOOK_COL, lot_size, symbol, data_dir
+from strategy_backtester.config import trade_book_col, lot_size, symbol, data_dir
 
 
 pd.set_option('display.max_columns', None)
@@ -34,12 +34,11 @@ def open_file(filename):
 
 
 def open_trade_book(sym, exp):
-    file_path = "data/{}-TRDBOOK-{}.csv".format(sym, exp)
+    file_path = data_dir + "/{}-TRDBOOK-{}.csv".format(sym, exp)
     if os.path.exists(file_path):
         return open_file(file_path)
     else:
-        df = pd.DataFrame(columns=TRADE_BOOK_COL)
-        return df
+        return pd.DataFrame(columns=trade_book_col)
 
 
 def save_df(df, sym, exp):
@@ -61,7 +60,7 @@ def dic_to_df(o):
 
     lst_update = [contract_name, date, ty, qty, p, adj_cost]
 
-    return pd.DataFrame([lst_update], columns=TRADE_BOOK_COL)
+    return pd.DataFrame([lst_update], columns=trade_book_col)
 
 
 def exit_loop(val):
@@ -72,7 +71,7 @@ def exit_loop(val):
 def no_trade_entry(tb, date):
     contract_name = 'NO-TRADE-DAY'
     lst_update = [contract_name, date, 0.0, 'NoTrade', 0.0]
-    return pd.DataFrame([lst_update], columns=TRADE_BOOK_COL)
+    return pd.DataFrame([lst_update], columns=trade_book_col)
 
 
 def trading_days(df, col="Date"):

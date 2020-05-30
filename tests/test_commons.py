@@ -36,6 +36,9 @@ class TestCommons(TestCase):
         trade_df = pd.DataFrame([lst], columns=config.TRADE_BOOK_COL)
         assert_frame_equal(commons.dic_to_df(trade), trade_df)
 
+    # def test_open_trade_book(self):
+    #     assert commons.open_trade_book(config.symbol, config.expiry_date) == []
+
     def test_trading_days(self):
         assert commons.trading_days(self.fixture_df) == ['2019-04-26']
         # if fail check data file
