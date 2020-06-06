@@ -31,6 +31,6 @@ find_avg_and_add_col_to_df_col = ['Contract_name', 'Type', 'Qty', 'Avg', 'Trade_
 display_buy_and_sell_side_by_side_col = ['Contract_name', 'Buy_Qty', 'Buy_Avg', 'Buy_Value', 'Sell_Qty', 'Sell_Avg',
                                          'Sell_Value']
 
-open_trade_positions_col = ['Contract_name', 'Type', 'Open_Qty']
+open_trade_positions_col = ['Contract_name', 'Open_Type', 'Open_Qty']
 
 trade_types = ['Buy', 'Sell']

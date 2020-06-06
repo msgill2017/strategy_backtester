@@ -91,14 +91,13 @@ class TestPortfolioBalance(TestCase):
         pd.testing.assert_series_equal((portfolio_balance.find_pending_trade(d_df)), expected_res,
                                        check_names=False)
 
-    def test_open_trade_positions(self):
-
-        op_df = pd.DataFrame(trade_book_data.expected_open_positions_lst,
-                              columns= config.open_trade_positions_col)
-        c_df = portfolio_balance.sum_qty_and_trade_value_contracts(self.fixture_tb_df)
-        a_df = portfolio_balance.find_avg_and_add_col_to_df(c_df)
-        d_df = portfolio_balance.display_buy_and_sell_side_by_side(a_df)
-        assert op_df.equals(portfolio_balance.open_trade_positions(d_df)) is True
+    # def test_open_trade_positions(self):
+    #
+    #     op_df = pd.DataFrame(trade_book_data.expected_open_positions_lst, columns=config.open_trade_positions_col)
+    #     c_df = portfolio_balance.sum_qty_and_trade_value_contracts(self.fixture_tb_df)
+    #     a_df = portfolio_balance.find_avg_and_add_col_to_df(c_df)
+    #     d_df = portfolio_balance.display_buy_and_sell_side_by_side(a_df)
+    #     assert op_df.equals(portfolio_balance.open_trade_positions(d_df)) is True
 
     def test_get_close_data(self):
         expected_res1 = pd.DataFrame([['DLF-190.0-CE', 4.25]], columns=['Contract_name', 'Close'])

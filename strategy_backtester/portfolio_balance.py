@@ -20,45 +20,29 @@ from strategy_backtester.config import trade_book, trade_book_col, \
     find_avg_and_add_col_to_df_col, trade_types, open_trade_positions_col, sum_qty_trade_value_col
 
 
-def previous_orders_from_trade_book(portfolio, df, previous_date):
+def profit_and_loss_statement(portfolio, df, previous_date):
     print("Current Portfolio with Profit and Loss as on {}".format(previous_date))
-    symbols = get_unique_contracts_lst(portfolio)
-    if 'NO-TRADE-DAY' in symbols:
-        symbols.remove('NO-TRADE-DAY')
-    print(portfolio)
 
-    return portfolio_positions(portfolio)
+    p_df = portfolio_positions(portfolio)
+    open_df = open_trade_positions(p_df, df)
+    portfolio_positions_df = merge_df(p_df, open_df)
+    portfolio_positions_df = merge_realized_profit_and_lost_to_positions(portfolio_positions_df)
+    portfolio_positions_df = merge_unrealized_profit_and_lost_to_positions(portfolio_positions_df)
+
+    print(portfolio_positions_df)
 
 
 def get_unique_contracts_lst(portfolio_df):
-    return portfolio_df[trade_book['Contract_name']].unique().tolist()
-
-# def portfolio_balance(portfolio, df, previous_date):
-#     print("Current Portfolio with Profit and Loss as on {}".format(previous_date))
-#
-#     # print(portfolio_positions_df)
-#
-#     portfolio_positions_df = open_trade_positions(portfolio_positions_df)
-#
-#     # print(portfolio_positions_df)
-#     #
-#     current_close_value_df = get_close_data(symbols, df)
-#     portfolio_positions_df = merge_df(portfolio_positions_df, current_close_value_df)
-#     # print(portfolio_positions_df)
-#     r_pnl_df = realized_profit(portfolio_positions_df)
-#     portfolio_positions_df = merge_df(portfolio_positions_df, r_pnl_df)
-#     #
-#     unr_pnl_df = un_realized_profit(portfolio_positions_df)
-#     combine_positions_df = merge_df(portfolio_positions_df, unr_pnl_df)
-#     print(combine_positions_df)
+    s = portfolio_df[trade_book['Contract_name']].unique().tolist()
+    if 'NO-TRADE-DAY' in s:
+        s.remove('NO-TRADE-DAY')
+    return s
 
 
 def portfolio_positions(trade_df):
-    print(trade_df)
     combine_df = sum_qty_and_trade_value_contracts(trade_df)
-    print(combine_df)
     avg_df = find_avg_and_add_col_to_df(combine_df)
-    print(avg_df)
+
     return display_buy_and_sell_side_by_side(avg_df)
 
 
@@ -92,35 +76,40 @@ def display_buy_and_sell_side_by_side(trade_df):
     return pos['Buy'].merge(pos['Sell'], on='Contract_name', how='outer').fillna(0.0)
 
 
-def sort_df_with_column(df, column):
-
-    return df.sort_values(by=column).reset_index(drop=True)
-
-
-
 def merge_df(df1, df2):
     return df1.merge(df2, on='Contract_name', how='outer').fillna(0.0)
 
 
-def open_trade_positions(df):
+def open_trade_positions(p_df, option_df):
     op_df = pd.DataFrame()
-    op_df[trade_book['Contract_name']] = df[trade_book['Contract_name']]
-    op_df['Open_Qty'] = abs(df['Buy_Qty'] - df['Sell_Qty'])
-    op_df['Type'] = find_pending_trade(df)
-    return op_df[open_trade_positions_col]
+    symbols = get_unique_contracts_lst(p_df)
+    op_df[trade_book['Contract_name']] = p_df[trade_book['Contract_name']]
+    op_df['Open_Qty'] = abs(p_df['Buy_Qty'] - p_df['Sell_Qty'])
+
+    op_df['Open_Type'] = find_pending_trade(p_df)
+    op_df[open_trade_positions_col]
+    adjust_close_df = get_close_data(symbols, option_df)
+
+    return merge_df(op_df, adjust_close_df)
 
 
 def common_elements(lst1, lst2):
     return list(set(lst1).intersection(lst2))
 
 
+def sort_df_with_column(df, column):
+
+    return df.sort_values(by=column).reset_index(drop=True)
+
+
 # Create a function to apply to each row of the data frame
 def find_pending_trade(df):
     """ Find the trade value according to its sign like negative number means Sell type
     or positive number means Buy """
-    df['Type'] = df['Buy_Qty'] - df['Sell_Qty']
+    p_df = pd.DataFrame()
+    p_df['Type'] = df['Buy_Qty'] - df['Sell_Qty']
 
-    return df['Type'].map(lambda val: trade_type_conversion(val))
+    return p_df['Type'].map(lambda val: trade_type_conversion(val))
 
 
 def trade_type_conversion(num):
@@ -132,23 +121,24 @@ def trade_type_conversion(num):
         return 'Sell'
 
 
-def un_realized_profit(df):
+def merge_unrealized_profit_and_lost_to_positions(df):
     unr_pnl_lst = []
     for row in df.itertuples():
         cn = row.Contract_name
-        if row.Type == 'Buy':
-            val = (row.Buy_Qty - row.Squared_Qty) * (row.Close - row.Buy_Avg)
-            val = round(val, 2)
-            unr_pnl_lst.append([cn, val])
-        else:
-            val = (row.Sell_Qty - row.Squared_Qty) * (row.Sell_Avg - row.Close)
-            val = round(val, 2)
-            unr_pnl_lst.append([cn, val])
+        if row.Open_Type != 'None':
+            if row.Open_Type == 'Buy':
+                val = row.Open_Qty * (row.Close - row.Buy_Avg)
+                val = round(val, 2)
+                unr_pnl_lst.append([cn, val])
+            else:
+                val = row.Open_Qty * (row.Sell_Avg - row.Close)
+                val = round(val, 2)
+                unr_pnl_lst.append([cn, val])
+    unr_df = pd.DataFrame(unr_pnl_lst, columns=['Contract_name', 'UnRealized_PnL'])
+    return merge_df(df, unr_df)
 
-    return pd.DataFrame(unr_pnl_lst, columns=['Contract_name', 'UnRealized_PnL'])
 
-
-def realized_profit(df):
+def merge_realized_profit_and_lost_to_positions(df):
     closed_contract_filter = (df['Buy_Qty'] > 0) & (df['Sell_Qty'] > 0)
     closed_df = df[closed_contract_filter]
     lists = []
@@ -162,11 +152,12 @@ def realized_profit(df):
             qty = row.Sell_Qty
             pnl = round(row.Sell_Qty * (row.Sell_Avg - row.Buy_Avg), 2)
             lists.append([cn, qty, pnl])
-
-    return pd.DataFrame(lists, columns=['Contract_name', 'Squared_Qty', 'Realized_PnL'])
+    r_df = pd.DataFrame(lists, columns=['Contract_name', 'Squared_Qty', 'Realized_PnL'])
+    return merge_df(df, r_df)
 
 
 def get_close_data(symbols_lst, df):
+
     sp = get_strike_price_list_from_contract_names(symbols_lst)
     closes = []
     temp = df[df['Strike Price'].isin(sp)]
