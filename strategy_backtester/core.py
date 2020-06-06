@@ -47,11 +47,6 @@ for day in remaining_working_days:
     filter_date = option_chain_df['Date'] == day
     current_day_option_chain_df = option_chain_df[filter_date]
 
-    if not orders.empty:
-        previous_trade_book = previous_trade_book.append(orders)
-        order_book = order_book.append(orders)
-        orders = pd.DataFrame()
-
     if already_trade_days:
         profit_and_loss_statement(previous_trade_book, previous_day_option_chain_df, previous_day)
 
@@ -64,8 +59,9 @@ for day in remaining_working_days:
             order = place_trade(current_day_option_chain_df)
             order['Date'] = day
             order_df = dic_to_df(order)
+            print(order_df)
             orders = orders.append(order_df, sort=False, ignore_index=True)
-
+            print(orders)
         if exit_loop(trade):
             print("Exit")
             break
@@ -80,9 +76,13 @@ for day in remaining_working_days:
 
             previous_day = day
             break
+
+    if not orders.empty:
+        previous_trade_book = previous_trade_book.append(orders)
+        order_book = order_book.append(orders)
+        orders = pd.DataFrame()
+
     if exit_loop(trade):
-        print(order_book)
         if not order_book.empty:
-            print(order_book)
             save_df(order_book, symbol, expiry_date)
         break
