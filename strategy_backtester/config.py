@@ -34,3 +34,6 @@ display_buy_and_sell_side_by_side_col = ['Contract_name', 'Buy_Qty', 'Buy_Avg', 
 open_trade_positions_col = ['Contract_name', 'Open_Type', 'Open_Qty']
 
 trade_types = ['Buy', 'Sell']
+
+message = {'Type': 'Type (Buy/Sell)', 'Option': 'Option (Call/Put)', 'Strike Price': 'Strike Price (from above list)',
+           'Premium': 'Premium ', 'Qty': 'Qty (No. of Lots) '}

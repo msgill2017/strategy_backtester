@@ -52,7 +52,8 @@ for day in remaining_working_days:
         order_book = order_book.append(orders)
         orders = pd.DataFrame()
 
-    profit_and_loss_statement(previous_trade_book, previous_day_option_chain_df, previous_day)
+    if already_trade_days:
+        profit_and_loss_statement(previous_trade_book, previous_day_option_chain_df, previous_day)
 
     while True:
 
@@ -71,7 +72,7 @@ for day in remaining_working_days:
 
         if trade and trade[0].upper() != 'Y':
 
-            # profit_and_loss_statement(trade_book, previous_day_option_chain_df, previous_day)
+            profit_and_loss_statement(previous_trade_book, previous_day_option_chain_df, previous_day)
 
             nte_df = no_trade_entry(day)
 

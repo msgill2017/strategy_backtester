@@ -8,11 +8,10 @@ Created on Sun May 14 2020
 email : msg8930@yahoo.com
 
 """
-from strategy_backtester.config import TRADE_COL
+from strategy_backtester.config import TRADE_COL, message
 from strategy_backtester.commons import is_inp_str_number
 
-from strategy_backtester.commons import open_file, open_trade_book, trading_days, exit_loop, save_df,\
-                    dic_to_df, no_trade_entry
+from strategy_backtester.commons import open_file
 from strategy_backtester.config import symbol, expiry_date, data_dir
 
 filename = data_dir + '/{}-OPTSTK-{}.csv'.format(symbol, expiry_date)
@@ -54,7 +53,7 @@ def place_trade(option_df):
     display_strike_price(option_df)
     trade = {}
     for key in TRADE_COL:
-        res = input("Enter the Trade {}: ".format(key))
+        res = input("Enter the {}: ".format(message[key]))
         validator = get_validator(key)
         trade[key] = validate(func=validator, key=key, res=res, option_df=option_df, trade=trade)
     return trade

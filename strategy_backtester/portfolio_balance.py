@@ -16,20 +16,23 @@ except ImportError:
     pass
 
 
-from strategy_backtester.config import trade_book, trade_book_col, \
-    find_avg_and_add_col_to_df_col, trade_types, open_trade_positions_col, sum_qty_trade_value_col
+from strategy_backtester.config import trade_book, find_avg_and_add_col_to_df_col, trade_types, open_trade_positions_col,\
+    sum_qty_trade_value_col
 
 
 def profit_and_loss_statement(portfolio, df, previous_date):
     print("Current Portfolio with Profit and Loss as on {}".format(previous_date))
+    contracts = get_unique_contracts_lst(portfolio)
+    if contracts:
+        p_df = portfolio_positions(portfolio)
+        open_df = open_trade_positions(p_df, df)
+        portfolio_positions_df = merge_df(p_df, open_df)
+        portfolio_positions_df = merge_realized_profit_and_lost_to_positions(portfolio_positions_df)
+        portfolio_positions_df = merge_unrealized_profit_and_lost_to_positions(portfolio_positions_df)
 
-    p_df = portfolio_positions(portfolio)
-    open_df = open_trade_positions(p_df, df)
-    portfolio_positions_df = merge_df(p_df, open_df)
-    portfolio_positions_df = merge_realized_profit_and_lost_to_positions(portfolio_positions_df)
-    portfolio_positions_df = merge_unrealized_profit_and_lost_to_positions(portfolio_positions_df)
-
-    print(portfolio_positions_df)
+        print(portfolio_positions_df)
+    else:
+        print("No Trade to Display")
 
 
 def get_unique_contracts_lst(portfolio_df):
