@@ -25,9 +25,9 @@ option_chain_df = open_file(filename)
 
 working_days = trading_days(option_chain_df)
 
-trade_book = open_trade_book(symbol, expiry_date)
+previous_trade_book = open_trade_book(symbol, expiry_date)
 
-already_trade_days = trading_days(trade_book, col='Open_date')
+already_trade_days = trading_days(previous_trade_book, col='Open_date')
 
 remaining_working_days = [elem for elem in working_days if elem not in already_trade_days]
 previous_day = working_days[0]
@@ -36,8 +36,10 @@ if already_trade_days:
     previous_day = already_trade_days[-1]
     # profit_and_loss_statement(trade_book, option_chain_df, previous_day)
 
+order_book = pd.DataFrame()
+orders = pd.DataFrame()
+
 for day in remaining_working_days:
-    order_book = pd.DataFrame()
 
     filter_date = option_chain_df['Date'] == previous_day
     previous_day_option_chain_df = option_chain_df[filter_date]
@@ -45,9 +47,12 @@ for day in remaining_working_days:
     filter_date = option_chain_df['Date'] == day
     current_day_option_chain_df = option_chain_df[filter_date]
 
-    if not order_book.empty:
-        trade_book = trade_book.append(order_book)
-    profit_and_loss_statement(trade_book, option_chain_df, previous_day)
+    if not orders.empty:
+        previous_trade_book = previous_trade_book.append(orders)
+        order_book = order_book.append(orders)
+        orders = pd.DataFrame()
+
+    profit_and_loss_statement(previous_trade_book, previous_day_option_chain_df, previous_day)
 
     while True:
 
@@ -58,7 +63,7 @@ for day in remaining_working_days:
             order = place_trade(current_day_option_chain_df)
             order['Date'] = day
             order_df = dic_to_df(order)
-            order_book = order_book.append(order_df, sort=False, ignore_index=True)
+            orders = orders.append(order_df, sort=False, ignore_index=True)
 
         if exit_loop(trade):
             print("Exit")
@@ -68,13 +73,15 @@ for day in remaining_working_days:
 
             # profit_and_loss_statement(trade_book, previous_day_option_chain_df, previous_day)
 
-            nte_df = no_trade_entry(order_book, day)
+            nte_df = no_trade_entry(day)
 
-            order_book = order_book.append(nte_df, sort=False, ignore_index=True)
+            orders = orders.append(nte_df, sort=False, ignore_index=True)
 
             previous_day = day
             break
     if exit_loop(trade):
-        if order_book.empty:
+        print(order_book)
+        if not order_book.empty:
+            print(order_book)
             save_df(order_book, symbol, expiry_date)
         break

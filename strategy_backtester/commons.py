@@ -43,10 +43,13 @@ def open_trade_book(sym, exp):
 
 def save_df(df, sym, exp):
     file_path = data_dir + "/{}-TRDBOOK-{}.csv".format(sym, exp)
-    print("Trade Book is Saving at this location {}".format(file_path))
-    with open(file_path, 'a') as f:
-        df.to_csv(f, header=f.tell() == 0, index=False)
-   
+    try:
+        with open(file_path, 'a') as f:
+            df.to_csv(f, header=f.tell() == 0, index=False)
+            print("Trade Book is Saved at this location {}".format(file_path))
+    except:
+        print("Something went wrong while saving at location {}".format(file_path))
+
 
 def dic_to_df(o):
     # df col. = Contract Name,Open Date,Qty,Type,Adj. Cost
@@ -68,10 +71,11 @@ def exit_loop(val):
         return True
 
 
-def no_trade_entry(tb, date):
+def no_trade_entry(date):
     contract_name = 'NO-TRADE-DAY'
-    lst_update = [contract_name, date, 0.0, 'NoTrade', 0.0]
-    return pd.DataFrame([lst_update], columns=trade_book_col)
+    # trade_book_col = ['Contract_name', 'Open_date', 'Type', 'Qty', 'Premium', 'Trade_value']
+    lst = [contract_name, date, 'NoTrade', 0,  0.0, 0.0]
+    return pd.DataFrame([lst], columns=trade_book_col)
 
 
 def trading_days(df, col="Date"):
