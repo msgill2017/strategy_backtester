@@ -47,7 +47,7 @@ for day in remaining_working_days:
     filter_date = option_chain_df['Date'] == day
     current_day_option_chain_df = option_chain_df[filter_date]
 
-    if already_trade_days:
+    if get_unique_contracts_lst(previous_trade_book):
         profit_and_loss_statement(previous_trade_book, previous_day_option_chain_df, previous_day)
 
     while True:
@@ -66,8 +66,8 @@ for day in remaining_working_days:
             break
 
         if trade and trade[0].upper() != 'Y':
-            if get_unique_contracts_lst(previous_trade_book):
-                profit_and_loss_statement(previous_trade_book, current_day_option_chain_df, day)
+            # if get_unique_contracts_lst(previous_trade_book):
+            #     profit_and_loss_statement(previous_trade_book, current_day_option_chain_df, day)
 
             nte_df = no_trade_entry(day)
 
