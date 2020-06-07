@@ -52,21 +52,22 @@ for day in remaining_working_days:
 
     while True:
 
-        trade = input("Are you interested in Trade Today (Yes or No) oR (Exit or e) for Exit:")
+        trade = input("Are you interested in Trade {} (Yes or No) oR (Exit or e) for Exit:".format(day))
         order = []
         if trade == '' or trade[0].upper() == 'Y':
 
             order = place_trade(current_day_option_chain_df)
             order['Date'] = day
             order_df = dic_to_df(order)
-            print(order_df)
             orders = orders.append(order_df, sort=False, ignore_index=True)
-            print(orders)
+
         if exit_loop(trade):
-            print("Exit")
+            # print("Exit")
             break
 
         if trade and trade[0].upper() != 'Y':
+
+            previous_day = day
 
             profit_and_loss_statement(previous_trade_book, previous_day_option_chain_df, previous_day)
 
@@ -74,7 +75,6 @@ for day in remaining_working_days:
 
             orders = orders.append(nte_df, sort=False, ignore_index=True)
 
-            previous_day = day
             break
 
     if not orders.empty:
