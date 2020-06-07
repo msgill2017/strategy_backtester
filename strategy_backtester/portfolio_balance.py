@@ -130,11 +130,11 @@ def merge_unrealized_profit_and_lost_to_positions(df):
         cn = row.Contract_name
         if row.Open_Type != 'None':
             if row.Open_Type == 'Buy':
-                val = row.Open_Qty * (row.Close - row.Buy_Avg)
+                val = row.Open_Qty * (-1*(row.Close - row.Sell_Avg))
                 val = round(val, 2)
                 unr_pnl_lst.append([cn, val])
             else:
-                val = row.Open_Qty * (row.Sell_Avg - row.Close)
+                val = row.Open_Qty * (-1*(row.Buy_Avg - row.Close))
                 val = round(val, 2)
                 unr_pnl_lst.append([cn, val])
     unr_df = pd.DataFrame(unr_pnl_lst, columns=['Contract_name', 'UnRealized_PnL'])

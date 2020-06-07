@@ -16,7 +16,7 @@ except ImportError:
 from strategy_backtester.commons import open_file, open_trade_book, trading_days, exit_loop, save_df,\
                     dic_to_df, no_trade_entry
 from strategy_backtester.config import symbol, expiry_date, data_dir
-from strategy_backtester.portfolio_balance import profit_and_loss_statement
+from strategy_backtester.portfolio_balance import profit_and_loss_statement, get_unique_contracts_lst
 from strategy_backtester.trade import place_trade
 
 filename = data_dir + '/{}-OPTSTK-{}.csv'.format(symbol, expiry_date)
@@ -66,14 +66,14 @@ for day in remaining_working_days:
             break
 
         if trade and trade[0].upper() != 'Y':
-
-            previous_day = day
-
-            profit_and_loss_statement(previous_trade_book, previous_day_option_chain_df, previous_day)
+            if get_unique_contracts_lst(previous_trade_book):
+                profit_and_loss_statement(previous_trade_book, current_day_option_chain_df, day)
 
             nte_df = no_trade_entry(day)
 
             orders = orders.append(nte_df, sort=False, ignore_index=True)
+
+            previous_day = day
 
             break
 
